@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jarvis.local/schemas/memory.schema.json",
+  "title": "Memory",
+  "description": "Row shape for public.memory (vector embeddings)",
+  "type": "object",
+  "required": ["id", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Matches clients.id"
+    },
+    "note": { "type": "string" },
+    "vector": {
+      "type": "array",
+      "items": { "type": "number" },
+      "description": "Embedding vector (stored as pgvector in Supabase)"
+    },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

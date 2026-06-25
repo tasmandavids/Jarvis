@@ -1,0 +1,21 @@
+{
+  "$schema": "../../schemas/agent.schema.json",
+  "id": "jarvis-claude",
+  "supabase_id": "a1111111-1111-4111-8111-111111111111",
+  "name": "Jarvis Orchestrator",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-20250514",
+  "role": "orchestrator",
+  "status": "active",
+  "description": "Primary orchestrator — plans, delegates, and synthesizes across agents",
+  "capabilities": ["reasoning", "planning", "code", "delegation"],
+  "tools": ["notion", "github", "supabase", "n8n"],
+  "system_prompt_ref": "prompts/orchestrator.md",
+  "config": {
+    "max_tokens": 8192,
+    "temperature": 0.4
+  },
+  "metadata": {
+    "default": true
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jarvis.local/schemas/agent.schema.json",
+  "title": "Agent",
+  "description": "AI agent definition for the Jarvis command centre",
+  "type": "object",
+  "required": ["id", "name", "provider", "model", "role", "status", "supabase_id"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "description": "Stable slug referenced in routing and workflows"
+    },
+    "supabase_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID used as agent_id / responsible in Supabase"
+    },
+    "name": { "type": "string" },
+    "provider": {
+      "type": "string",
+      "enum": ["anthropic", "openai", "google"]
+    },
+    "model": { "type": "string" },
+    "role": {
+      "type": "string",
+      "enum": ["orchestrator", "specialist", "reviewer", "executor"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "paused", "deprecated"]
+    },
+    "description": { "type": "string" },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tools": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "system_prompt_ref": {
+      "type": "string",
+      "description": "Path to prompt file relative to repo root"
+    },
+    "config": {
+      "type": "object",
+      "properties": {
+        "max_tokens": { "type": "integer", "minimum": 1 },
+        "temperature": { "type": "number", "minimum": 0, "maximum": 2 }
+      },
+      "additionalProperties": true
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

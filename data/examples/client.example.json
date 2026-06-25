@@ -1,0 +1,8 @@
+{
+  "$schema": "../../schemas/client.schema.json",
+  "id": "00000000-0000-4000-8000-000000000010",
+  "name": "Example Client",
+  "email": "client@example.com",
+  "country": "AU",
+  "created_at": "2026-01-01T00:00:00.000Z"
+}

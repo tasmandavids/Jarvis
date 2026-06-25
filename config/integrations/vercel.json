@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/integration.schema.json",
+  "id": "vercel",
+  "name": "Vercel",
+  "type": "vercel",
+  "status": "disconnected",
+  "env_keys": ["VERCEL_TOKEN"],
+  "docs_url": "https://vercel.com/docs",
+  "metadata": {
+    "purpose": "Dashboard hosting, API routes, edge functions"
+  }
+}

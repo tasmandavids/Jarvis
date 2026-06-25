@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/workflow.schema.json",
+  "id": "task-intake",
+  "name": "Task Intake",
+  "description": "Receives tasks from Notion/GitHub/dashboard, writes to Supabase, routes to agent",
+  "status": "draft",
+  "trigger": "webhook",
+  "n8n_workflow_file": "n8n/workflows/task-intake.json",
+  "webhook_path": "/jarvis/task-intake",
+  "agents": ["jarvis-claude"],
+  "integrations": ["notion", "supabase", "n8n"]
+}

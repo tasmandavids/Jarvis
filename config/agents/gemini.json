@@ -1,0 +1,18 @@
+{
+  "$schema": "../../schemas/agent.schema.json",
+  "id": "jarvis-gemini",
+  "supabase_id": "a3333333-3333-4333-8333-333333333333",
+  "name": "Jarvis Researcher",
+  "provider": "google",
+  "model": "gemini-2.5-pro",
+  "role": "specialist",
+  "status": "active",
+  "description": "Research and long-context analysis — docs, summaries, multi-source synthesis",
+  "capabilities": ["research", "long_context", "multimodal"],
+  "tools": ["notion"],
+  "system_prompt_ref": "prompts/researcher.md",
+  "config": {
+    "max_tokens": 8192,
+    "temperature": 0.5
+  }
+}

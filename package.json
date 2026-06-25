@@ -1,0 +1,17 @@
+{
+  "name": "jarvis",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@jarvis/dashboard",
+    "build": "npm run build --workspace=@jarvis/dashboard",
+    "lint": "npm run lint --workspace=@jarvis/dashboard",
+    "validate:config": "node scripts/validate-config.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

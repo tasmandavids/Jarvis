@@ -1,0 +1,16 @@
+{
+  "$schema": "../../schemas/integration.schema.json",
+  "id": "supabase",
+  "name": "Supabase",
+  "type": "supabase",
+  "status": "disconnected",
+  "env_keys": [
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY"
+  ],
+  "docs_url": "https://supabase.com/docs",
+  "metadata": {
+    "purpose": "System of record — clients, tasks, memory, agent_runs, comms_log"
+  }
+}

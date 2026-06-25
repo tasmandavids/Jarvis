@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/integration.schema.json",
+  "id": "github",
+  "name": "GitHub",
+  "type": "github",
+  "status": "disconnected",
+  "env_keys": ["GITHUB_TOKEN", "GITHUB_REPO"],
+  "docs_url": "https://docs.github.com/en/rest",
+  "metadata": {
+    "purpose": "Source of truth for config JSON, issues, PRs, CI triggers"
+  }
+}

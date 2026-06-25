@@ -1,0 +1,11 @@
+{
+  "$schema": "../../schemas/workflow.schema.json",
+  "id": "agent-dispatch",
+  "name": "Agent Dispatch",
+  "description": "Picks agent from routing.json and invokes the correct LLM provider",
+  "status": "draft",
+  "trigger": "supabase",
+  "n8n_workflow_file": "n8n/workflows/agent-dispatch.json",
+  "agents": ["jarvis-claude", "jarvis-openai", "jarvis-gemini"],
+  "integrations": ["supabase", "n8n"]
+}

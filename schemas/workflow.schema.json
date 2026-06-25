@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jarvis.local/schemas/workflow.schema.json",
+  "title": "Workflow",
+  "description": "n8n workflow registry entry (metadata only — full workflow JSON lives in n8n/)",
+  "type": "object",
+  "required": ["id", "name", "trigger", "status"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": ["active", "draft", "archived"]
+    },
+    "trigger": {
+      "type": "string",
+      "enum": ["webhook", "schedule", "notion", "github", "supabase", "manual"]
+    },
+    "n8n_workflow_file": {
+      "type": "string",
+      "description": "Path to exported n8n workflow JSON"
+    },
+    "webhook_path": { "type": "string" },
+    "agents": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "integrations": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

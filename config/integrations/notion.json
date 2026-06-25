@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/integration.schema.json",
+  "id": "notion",
+  "name": "Notion",
+  "type": "notion",
+  "status": "disconnected",
+  "env_keys": ["NOTION_API_KEY", "NOTION_COMMAND_CENTRE_PAGE_ID"],
+  "docs_url": "https://developers.notion.com",
+  "metadata": {
+    "purpose": "Command centre UI, task database, knowledge base sync"
+  }
+}

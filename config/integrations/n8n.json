@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/integration.schema.json",
+  "id": "n8n",
+  "name": "n8n",
+  "type": "n8n",
+  "status": "disconnected",
+  "env_keys": ["N8N_WEBHOOK_BASE_URL", "N8N_API_KEY"],
+  "docs_url": "https://docs.n8n.io",
+  "metadata": {
+    "purpose": "Workflow automation — webhooks, schedules, cross-service orchestration"
+  }
+}

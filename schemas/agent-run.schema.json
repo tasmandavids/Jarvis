@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jarvis.local/schemas/agent-run.schema.json",
+  "title": "AgentRun",
+  "description": "Row shape for public.agent_runs",
+  "type": "object",
+  "required": ["id", "agent_id", "task_id", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Shared entity id (links client, memory, or task row)"
+    },
+    "agent_id": { "type": "string", "format": "uuid" },
+    "task_id": { "type": "string", "format": "uuid" },
+    "status": { "type": "string" },
+    "details": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

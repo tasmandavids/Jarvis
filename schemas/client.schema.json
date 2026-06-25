@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jarvis.local/schemas/client.schema.json",
+  "title": "Client",
+  "description": "Row shape for public.clients",
+  "type": "object",
+  "required": ["id", "email", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "name": { "type": "string" },
+    "email": { "type": "string", "format": "email" },
+    "country": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

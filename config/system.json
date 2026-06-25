@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0",
+  "name": "Jarvis Command Centre",
+  "description": "AI agent orchestration hub",
+  "default_agent_id": "jarvis-claude",
+  "timezone": "UTC",
+  "data_paths": {
+    "agents": "config/agents",
+    "integrations": "config/integrations",
+    "workflows": "config/workflows",
+    "task_status_labels": "config/task-status-labels.json",
+    "schemas": "schemas",
+    "prompts": "prompts",
+    "local_state": "data/local"
+  },
+  "features": {
+    "realtime_dashboard": true,
+    "notion_sync": true,
+    "n8n_orchestration": true,
+    "github_webhooks": false
+  }
+}

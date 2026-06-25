@@ -1,0 +1,8 @@
+{
+  "name": "Task Intake (stub)",
+  "nodes": [],
+  "connections": {},
+  "meta": {
+    "description": "Replace with exported n8n workflow. Webhook → Supabase insert → route by intent."
+  }
+}
