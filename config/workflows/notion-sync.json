@@ -1,0 +1,15 @@
+{
+  "$schema": "../../schemas/workflow.schema.json",
+  "id": "notion-sync",
+  "name": "Notion Sync (Pull)",
+  "description": "Scheduled pull from Notion command centre → upsert tasks in Supabase",
+  "status": "draft",
+  "trigger": "schedule",
+  "n8n_workflow_file": "n8n/workflows/notion-sync.json",
+  "agents": ["jarvis-claude"],
+  "integrations": ["notion", "supabase", "n8n"],
+  "metadata": {
+    "direction": "notion_to_supabase",
+    "intent_resolution": "resolveIntent on headline + description"
+  }
+}

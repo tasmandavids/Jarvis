@@ -14,8 +14,14 @@
     },
     "agent_id": { "type": "string", "format": "uuid" },
     "task_id": { "type": "string", "format": "uuid" },
-    "status": { "type": "string" },
-    "details": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "running", "completed", "failed", "retrying"]
+    },
+    "details": {
+      "type": "string",
+      "description": "JSON string — see schemas/agent-run-details.schema.json"
+    },
     "created_at": { "type": "string", "format": "date-time" }
   }
 }

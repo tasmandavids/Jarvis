@@ -1,0 +1,18 @@
+{
+  "$schema": "../../schemas/integration.schema.json",
+  "id": "slack",
+  "name": "Slack",
+  "type": "slack",
+  "status": "disconnected",
+  "env_keys": [
+    "SLACK_BOT_TOKEN",
+    "SLACK_SIGNING_SECRET",
+    "SLACK_COMMAND_CENTRE_CHANNEL_ID"
+  ],
+  "docs_url": "https://api.slack.com/docs",
+  "metadata": {
+    "purpose": "Real-time operator channel — task intake, status alerts, agent notifications",
+    "events_endpoint": "/api/slack/events",
+    "channel_config": "config/slack/channels.json"
+  }
+}

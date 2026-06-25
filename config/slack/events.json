@@ -1,0 +1,41 @@
+{
+  "events_api_path": "/api/slack/events",
+  "subscriptions": [
+    {
+      "type": "app_mention",
+      "action": "create_task",
+      "default_intent": "orchestrate",
+      "description": "@Jarvis mentions create orchestration tasks"
+    },
+    {
+      "type": "message",
+      "channel_ref": "command_centre",
+      "action": "create_task",
+      "default_intent": "orchestrate",
+      "description": "Messages in command centre channel (when not a bot message)"
+    }
+  ],
+  "slash_commands": [
+    {
+      "command": "/jarvis",
+      "description": "Dispatch a task to Jarvis",
+      "usage": "/jarvis <task headline>",
+      "default_intent": "orchestrate"
+    },
+    {
+      "command": "/jarvis-status",
+      "description": "Show open tasks and agent status",
+      "default_intent": "execute"
+    }
+  ],
+  "interactive_actions": [
+    {
+      "action_id": "jarvis_approve",
+      "description": "Approve a pending agent action"
+    },
+    {
+      "action_id": "jarvis_cancel",
+      "description": "Cancel a running task"
+    }
+  ]
+}

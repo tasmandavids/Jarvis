@@ -1,0 +1,12 @@
+{
+  "$schema": "../../schemas/workflow.schema.json",
+  "id": "slack-intake",
+  "name": "Slack Intake",
+  "description": "Receives Slack events/commands, creates tasks in Supabase, logs comms_log",
+  "status": "draft",
+  "trigger": "webhook",
+  "n8n_workflow_file": "n8n/workflows/slack-intake.json",
+  "webhook_path": "/jarvis/slack-intake",
+  "agents": ["jarvis-claude"],
+  "integrations": ["slack", "supabase", "n8n"]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Slack Notify (stub)",
+  "nodes": [],
+  "connections": {},
+  "meta": {
+    "description": "Supabase trigger → format message → Slack chat.postMessage → comms_log insert"
+  }
+}

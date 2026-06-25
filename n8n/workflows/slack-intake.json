@@ -1,0 +1,8 @@
+{
+  "name": "Slack Intake (stub)",
+  "nodes": [],
+  "connections": {},
+  "meta": {
+    "description": "Slack event/command → validate → insert tasks → forward to agent-dispatch"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "../../schemas/workflow.schema.json",
+  "id": "notion-writeback",
+  "name": "Notion Write-back",
+  "description": "Push task status and agent output from Supabase → Notion pages",
+  "status": "draft",
+  "trigger": "supabase",
+  "n8n_workflow_file": "n8n/workflows/notion-writeback.json",
+  "agents": ["jarvis-openai"],
+  "integrations": ["notion", "supabase", "n8n"],
+  "metadata": {
+    "direction": "supabase_to_notion",
+    "trigger_on": ["agent_runs.status = completed", "tasks.status contains done"]
+  }
+}

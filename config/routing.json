@@ -28,6 +28,7 @@
   ],
   "intent_detection": {
     "mode": "keyword",
+    "default_intent": "orchestrate",
     "keywords": {
       "research": ["research", "summarize", "analyze", "compare"],
       "execute": ["run", "execute", "deploy", "create issue", "update"],

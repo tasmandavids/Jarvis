@@ -9,8 +9,9 @@
   "status": "active",
   "description": "Primary orchestrator — plans, delegates, and synthesizes across agents",
   "capabilities": ["reasoning", "planning", "code", "delegation"],
-  "tools": ["notion", "github", "supabase", "n8n"],
+  "tools": ["notion", "github", "supabase", "n8n", "slack"],
   "system_prompt_ref": "prompts/orchestrator.md",
+  "prompt_version": "1.0.0",
   "config": {
     "max_tokens": 8192,
     "temperature": 0.4

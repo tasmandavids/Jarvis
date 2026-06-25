@@ -44,6 +44,10 @@
       "type": "string",
       "description": "Path to prompt file relative to repo root"
     },
+    "prompt_version": {
+      "type": "string",
+      "description": "Semantic version of system_prompt_ref — recorded in agent_runs.details"
+    },
     "config": {
       "type": "object",
       "properties": {

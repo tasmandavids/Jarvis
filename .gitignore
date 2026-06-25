@@ -10,10 +10,12 @@ dist/
 build/
 .vercel/
 
-# Environment
+# Environment — never commit secrets (see docs/SECRETS.md)
 .env
 .env.*
 !.env.example
+apps/dashboard/.env.local
+apps/dashboard/.env*.local
 
 # Secrets & local state
 data/local/
@@ -39,3 +41,4 @@ npm-debug.log*
 
 # Testing
 coverage/
+.vercel

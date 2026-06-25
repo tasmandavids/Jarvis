@@ -9,7 +9,12 @@
     "dev": "npm run dev --workspace=@jarvis/dashboard",
     "build": "npm run build --workspace=@jarvis/dashboard",
     "lint": "npm run lint --workspace=@jarvis/dashboard",
-    "validate:config": "node scripts/validate-config.mjs"
+    "validate:config": "node scripts/validate-config.mjs",
+    "test:routing": "node scripts/test-routing.mjs",
+    "vercel:link": "cd apps/dashboard && npx vercel@latest link --yes --scope olune --project jarvis",
+    "env:pull": "cd apps/dashboard && npx vercel@latest env pull .env.local --yes",
+    "env:push": "node scripts/sync-vercel-env.mjs",
+    "env:ls": "cd apps/dashboard && npx vercel@latest env ls"
   },
   "engines": {
     "node": ">=20"

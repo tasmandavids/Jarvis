@@ -11,6 +11,7 @@
   "capabilities": ["research", "long_context", "multimodal"],
   "tools": ["notion"],
   "system_prompt_ref": "prompts/researcher.md",
+  "prompt_version": "1.0.0",
   "config": {
     "max_tokens": 8192,
     "temperature": 0.5

@@ -1,0 +1,25 @@
+{
+  "channels": [
+    {
+      "id": "command_centre",
+      "name": "Command Centre",
+      "env_key": "SLACK_COMMAND_CENTRE_CHANNEL_ID",
+      "purpose": "Primary operator channel — task updates, agent status, @jarvis mentions",
+      "notify_on": ["task.created", "task.updated", "task.completed", "agent.invoked"]
+    },
+    {
+      "id": "alerts",
+      "name": "Alerts",
+      "env_key": "SLACK_ALERTS_CHANNEL_ID",
+      "purpose": "Errors, failures, and escalations",
+      "notify_on": ["task.failed", "integration.error", "agent.failed"]
+    },
+    {
+      "id": "agent_runs",
+      "name": "Agent Runs",
+      "env_key": "SLACK_AGENT_RUNS_CHANNEL_ID",
+      "purpose": "Verbose agent execution logs (optional)",
+      "notify_on": ["agent.completed"]
+    }
+  ]
+}

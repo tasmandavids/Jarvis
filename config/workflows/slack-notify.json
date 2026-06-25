@@ -1,0 +1,11 @@
+{
+  "$schema": "../../schemas/workflow.schema.json",
+  "id": "slack-notify",
+  "name": "Slack Notify",
+  "description": "Posts task and agent events to configured Slack channels",
+  "status": "draft",
+  "trigger": "supabase",
+  "n8n_workflow_file": "n8n/workflows/slack-notify.json",
+  "agents": ["jarvis-claude"],
+  "integrations": ["slack", "supabase", "n8n"]
+}

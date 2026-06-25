@@ -2,10 +2,22 @@
   "$schema": "../../schemas/workflow.schema.json",
   "id": "agent-dispatch",
   "name": "Agent Dispatch",
-  "description": "Picks agent from routing.json and invokes the correct LLM provider",
+  "description": "Route by intent, invoke LLM, record agent_runs with retry and fallback",
   "status": "draft",
   "trigger": "supabase",
   "n8n_workflow_file": "n8n/workflows/agent-dispatch.json",
   "agents": ["jarvis-claude", "jarvis-openai", "jarvis-gemini"],
-  "integrations": ["supabase", "n8n"]
+  "integrations": ["supabase", "n8n"],
+  "metadata": {
+    "agent_run_statuses": ["pending", "running", "completed", "failed", "retrying"],
+    "retry": {
+      "max_attempts": 3,
+      "backoff_seconds": [5, 30, 120],
+      "on_primary_failure": "fallback_agent",
+      "on_fallback_failure": "mark_failed",
+      "task_status_on_failure": "failed",
+      "notify_slack_on_failure": true
+    },
+    "details_builder": "buildAgentRunDetails from @jarvis/config"
+  }
 }

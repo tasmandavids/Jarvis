@@ -9,8 +9,9 @@
   "status": "active",
   "description": "Fast execution agent for structured tasks, API calls, and tool use",
   "capabilities": ["tool_use", "structured_output", "code"],
-  "tools": ["notion", "github", "supabase"],
+  "tools": ["notion", "github", "supabase", "slack"],
   "system_prompt_ref": "prompts/executor.md",
+  "prompt_version": "1.0.0",
   "config": {
     "max_tokens": 4096,
     "temperature": 0.2

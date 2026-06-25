@@ -1,0 +1,16 @@
+{
+  "$schema": "../../schemas/workflow.schema.json",
+  "id": "github-writeback",
+  "name": "GitHub Write-back",
+  "description": "Comment on or close GitHub issues when Jarvis completes related tasks",
+  "status": "draft",
+  "trigger": "supabase",
+  "n8n_workflow_file": "n8n/workflows/github-writeback.json",
+  "agents": ["jarvis-openai"],
+  "integrations": ["github", "supabase", "n8n"],
+  "metadata": {
+    "direction": "supabase_to_github",
+    "trigger_on": ["agent_runs.status = completed", "tasks.status contains done"],
+    "requires": "github_webhooks feature flag or issue URL in task.description"
+  }
+}

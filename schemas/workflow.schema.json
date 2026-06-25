@@ -16,7 +16,7 @@
     },
     "trigger": {
       "type": "string",
-      "enum": ["webhook", "schedule", "notion", "github", "supabase", "manual"]
+      "enum": ["webhook", "schedule", "notion", "github", "supabase", "slack", "manual"]
     },
     "n8n_workflow_file": {
       "type": "string",

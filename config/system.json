@@ -7,6 +7,7 @@
   "data_paths": {
     "agents": "config/agents",
     "integrations": "config/integrations",
+    "slack": "config/slack",
     "workflows": "config/workflows",
     "task_status_labels": "config/task-status-labels.json",
     "schemas": "schemas",
@@ -16,6 +17,7 @@
   "features": {
     "realtime_dashboard": true,
     "notion_sync": true,
+    "slack_notifications": true,
     "n8n_orchestration": true,
     "github_webhooks": false
   }
