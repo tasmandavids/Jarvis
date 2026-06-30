@@ -7,14 +7,13 @@
     "start": "electron .",
     "dev": "NODE_ENV=development electron .",
     "build": "electron-builder --mac",
-    "dist": "bash -lc 'npm run build --prefix ../dashboard && cp ../dashboard/.env.local ../dashboard/.next/standalone/.env.local && electron-builder --mac --publish never'"
+    "dist": "bash -lc 'cd ../.. && npm run build && cp apps/dashboard/.env.local apps/dashboard/.next/standalone/.env.local && cd apps/desktop && electron-builder --mac --publish never'"
   },
   "build": {
     "appId": "com.tasmandavids.cypher",
     "productName": "CYPHER",
     "mac": {
       "category": "public.app-category.productivity",
-      "icon": "assets/icon.icns",
       "target": [
         {
           "target": "dmg",
@@ -37,6 +36,16 @@
       {
         "from": "../dashboard/.next/standalone",
         "to": "dashboard",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "../../config",
+        "to": "config-root/config",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "../../prompts",
+        "to": "config-root/prompts",
         "filter": ["**/*"]
       }
     ]

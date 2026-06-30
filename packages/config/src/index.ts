@@ -1,7 +1,10 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-const REPO_ROOT = join(process.cwd(), "../..");
+// JARVIS_REPO_ROOT is set by the Electron main process so the packaged app
+// can find config/ files. Falls back to cwd-relative resolution for plain
+// Next.js dev/production outside Electron.
+const REPO_ROOT = process.env.JARVIS_REPO_ROOT ?? join(process.cwd(), "../..");
 
 export type AgentConfig = {
   id: string;

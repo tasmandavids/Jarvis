@@ -10,8 +10,20 @@ process.env.PATH = [
 ].filter(Boolean).join(':');
 
 const NEXT_PORT = 3000;
-const NEXT_DIR  = path.join(__dirname, '..', 'dashboard');
 const DEV_MODE  = process.env.NODE_ENV === 'development';
+
+// In dev: Next.js lives at apps/dashboard (sibling of apps/desktop)
+// In production (packaged): extraResources copies .next/standalone → Resources/dashboard
+const NEXT_DIR = DEV_MODE
+  ? path.join(__dirname, '..', 'dashboard')
+  : path.join(process.resourcesPath, 'dashboard');
+
+// Expose repo root to @jarvis/config so it can find config/*.json
+// In dev: two levels up from apps/desktop = repo root
+// In production: config/ is bundled as Resources/config
+process.env.JARVIS_REPO_ROOT = DEV_MODE
+  ? path.join(__dirname, '..', '..')
+  : path.join(process.resourcesPath, 'config-root');
 
 let mainWindow = null;
 let tray       = null;
@@ -33,8 +45,9 @@ function startNextServer() {
       stdio: 'pipe',
     });
   } else {
+    // Standalone build puts server.js at the root of the output directory
     script = process.execPath;
-    const serverPath = path.join(NEXT_DIR, 'apps', 'dashboard', 'server.js');
+    const serverPath = path.join(NEXT_DIR, 'server.js');
     cwd = NEXT_DIR;
     nextServer = spawn(script, [serverPath], {
       cwd,
@@ -86,7 +99,7 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'assets', 'CYPHER Interface.dc.html'));
+  mainWindow.loadURL(`http://localhost:${NEXT_PORT}`);
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
@@ -117,16 +130,6 @@ function createTray() {
 async function bootstrap() {
   if (initialized) return;
   initialized = true;
-
-  if (!DEV_MODE) {
-    const { execSync } = require('child_process');
-    try {
-      console.log('[cypher] Building Next.js app...');
-      execSync('npm run build', { cwd: NEXT_DIR, stdio: 'inherit' });
-    } catch (e) {
-      console.error('[cypher] Build failed:', e.message);
-    }
-  }
 
   startNextServer();
 
