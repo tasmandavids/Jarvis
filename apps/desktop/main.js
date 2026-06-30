@@ -9,7 +9,7 @@ process.env.PATH = [
   '/usr/sbin', '/sbin', process.env.PATH,
 ].filter(Boolean).join(':');
 
-const NEXT_PORT = 3000;
+const NEXT_PORT = 3005;
 const DEV_MODE  = process.env.NODE_ENV === 'development';
 
 // In dev: Next.js lives at apps/dashboard (sibling of apps/desktop)

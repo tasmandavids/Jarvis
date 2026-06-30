@@ -13,7 +13,8 @@
     "@google/generative-ai": "^0.24.1",
     "@jarvis/config": "*",
     "@supabase/supabase-js": "^2.49.8",
-    "next": "^15.3.3",
+    "electron": "42.5.1",
+    "next": "^16.2.9",
     "openai": "^6.45.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
