@@ -7,7 +7,7 @@
     "start": "electron .",
     "dev": "NODE_ENV=development electron .",
     "build": "electron-builder --mac",
-    "dist": "bash -lc 'cd ../.. && npm run build && cp apps/dashboard/.env.local apps/dashboard/.next/standalone/apps/dashboard/.env.local && cp -r apps/dashboard/.next/static apps/dashboard/.next/standalone/apps/dashboard/.next/static && cp -r apps/dashboard/public apps/dashboard/.next/standalone/apps/dashboard/public 2>/dev/null || true && cd apps/desktop && electron-builder --mac --publish never'"
+    "dist": "bash -lc 'cd ../.. && npm run build && cp apps/web/.env.local apps/web/.next/standalone/apps/web/.env.local && mkdir -p apps/web/.next/standalone/apps/web/.next && cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static && cp -r apps/web/public apps/web/.next/standalone/apps/web/public 2>/dev/null || true && cd apps/desktop && electron-builder --mac --publish never'"
   },
   "build": {
     "appId": "com.tasmandavids.cypher",
@@ -18,10 +18,7 @@
       "target": [
         {
           "target": "dmg",
-          "arch": [
-            "arm64",
-            "x64"
-          ]
+          "arch": ["arm64", "x64"]
         }
       ]
     },
@@ -30,30 +27,13 @@
     },
     "files": [
       "main.js",
-      "preload.js",
-      "assets/**"
+      "preload.js"
     ],
     "extraResources": [
       {
-        "from": "../dashboard/.next/standalone",
-        "to": "dashboard",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
-        "from": "../../config",
-        "to": "config-root/config",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
-        "from": "../../prompts",
-        "to": "config-root/prompts",
-        "filter": [
-          "**/*"
-        ]
+        "from": "../web/.next/standalone",
+        "to": "app",
+        "filter": ["**/*"]
       }
     ]
   },

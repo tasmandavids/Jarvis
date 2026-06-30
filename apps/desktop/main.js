@@ -3,7 +3,7 @@ const { spawn } = require('child_process');
 const path = require('path');
 const http = require('http');
 
-// Enforce single instance — if another CYPHER is already running, focus it and quit this one
+// Enforce single instance — focus existing window if already running
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
   app.quit();
@@ -19,20 +19,12 @@ process.env.PATH = [
 const NEXT_PORT = 3005;
 const DEV_MODE  = process.env.NODE_ENV === 'development';
 
-// In dev: Next.js lives at apps/dashboard (sibling of apps/desktop)
-// In production: extraResources copies .next/standalone → Resources/dashboard
-// outputFileTracingRoot mirrors the monorepo so server.js sits at
-// Resources/dashboard/apps/dashboard/server.js
+// Dev:  apps/web (sibling of apps/desktop)
+// Prod: extraResources copies .next/standalone → Resources/app
+//       turbopack.root traces from monorepo root so server.js lands at app/apps/web/server.js
 const NEXT_DIR = DEV_MODE
-  ? path.join(__dirname, '..', 'dashboard')
-  : path.join(process.resourcesPath, 'dashboard', 'apps', 'dashboard');
-
-// Expose repo root to @jarvis/config so it can find config/*.json
-// In dev: two levels up from apps/desktop = repo root
-// In production: config/ is bundled as Resources/config
-process.env.JARVIS_REPO_ROOT = DEV_MODE
-  ? path.join(__dirname, '..', '..')
-  : path.join(process.resourcesPath, 'config-root');
+  ? path.join(__dirname, '..', 'web')
+  : path.join(process.resourcesPath, 'app', 'apps', 'web');
 
 let mainWindow = null;
 let tray       = null;
@@ -42,24 +34,17 @@ let initialized = false;
 
 // ── Start Next.js server ─────────────────────────────────────────────────────
 function startNextServer() {
-  let script, cwd;
-
   if (DEV_MODE) {
-    script = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-    cwd = NEXT_DIR;
-    const args = ['run', 'dev'];
-    nextServer = spawn(script, args, {
-      cwd,
+    const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+    nextServer = spawn(npm, ['run', 'dev'], {
+      cwd: NEXT_DIR,
       env: { ...process.env, PORT: String(NEXT_PORT) },
       stdio: 'pipe',
     });
   } else {
-    // Standalone build puts server.js at the root of the output directory
-    script = process.execPath;
     const serverPath = path.join(NEXT_DIR, 'server.js');
-    cwd = NEXT_DIR;
-    nextServer = spawn(script, [serverPath], {
-      cwd,
+    nextServer = spawn(process.execPath, [serverPath], {
+      cwd: NEXT_DIR,
       env: { ...process.env, PORT: String(NEXT_PORT), NODE_ENV: 'production' },
       stdio: 'pipe',
     });
@@ -87,12 +72,9 @@ function waitForServer(url, retries = 60, interval = 1000) {
   });
 }
 
-// ── Create the main window (guarded: no duplicates) ─────────────────────────
+// ── Create the main window ───────────────────────────────────────────────────
 function createWindow() {
-  if (mainWindow) {
-    mainWindow.focus();
-    return;
-  }
+  if (mainWindow) { mainWindow.focus(); return; }
 
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -109,24 +91,19 @@ function createWindow() {
   });
 
   mainWindow.loadURL(`http://localhost:${NEXT_PORT}`);
-
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
     return { action: 'deny' };
   });
-
   mainWindow.on('closed', () => { mainWindow = null; });
 }
 
-// ── Menu bar tray (guarded: created once) ───────────────────────────────────
+// ── Menu bar tray ────────────────────────────────────────────────────────────
 function createTray() {
   if (tray) return;
-
-  const iconPath = path.join(__dirname, 'assets', 'tray-icon.png');
+  const iconPath = path.join(__dirname, 'tray-icon.png');
   const icon = nativeImage.createFromPath(iconPath);
-  const trayIcon = icon.isEmpty() ? nativeImage.createEmpty() : icon;
-
-  tray = new Tray(trayIcon);
+  tray = new Tray(icon.isEmpty() ? nativeImage.createEmpty() : icon);
   tray.setToolTip('CYPHER');
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Open CYPHER', click: () => { mainWindow ? mainWindow.show() : createWindow(); } },
@@ -135,14 +112,13 @@ function createTray() {
   ]));
 }
 
-// ── One-time bootstrap ───────────────────────────────────────────────────────
+// ── Bootstrap ────────────────────────────────────────────────────────────────
 async function bootstrap() {
   if (initialized) return;
   initialized = true;
 
   startNextServer();
 
-  // Loading window while server boots
   const loadingWindow = new BrowserWindow({
     width: 480, height: 300,
     titleBarStyle: 'hiddenInset',
@@ -176,7 +152,7 @@ async function bootstrap() {
       backgroundColor: '#0a0a0a',
       resizable: false,
       webPreferences: { contextIsolation: true },
-    }).loadURL(`data:text/html,<html style="background:#0a0a0a;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:system-ui"><div style="color:#ff6b6b;text-align:center"><p style="font-size:18px;font-weight:bold">CYPHER failed to start</p><p style="color:#aaa;margin-top:8px">The dashboard server could not be reached.<br>Check the terminal output for details.</p></div></html>`);
+    }).loadURL(`data:text/html,<html style="background:#0a0a0a;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:system-ui"><div style="color:#ff6b6b;text-align:center"><p style="font-size:18px;font-weight:bold">CYPHER failed to start</p><p style="color:#aaa;margin-top:8px">Check Console.app → CYPHER for details.</p></div></html>`);
   }
 }
 
@@ -190,12 +166,10 @@ app.on('second-instance', () => {
 });
 
 app.on('activate', () => {
-  // Only open a window if server is up and no window exists
   if (serverReady && !mainWindow) createWindow();
 });
 
 app.on('window-all-closed', () => {
-  // Keep running in tray on macOS
   if (process.platform !== 'darwin') app.quit();
 });
 
@@ -203,9 +177,5 @@ app.on('before-quit', () => {
   if (nextServer) nextServer.kill();
 });
 
-process.on('uncaughtException', (err) => {
-  console.error('[cypher] Uncaught exception:', err);
-});
-process.on('unhandledRejection', (reason) => {
-  console.error('[cypher] Unhandled rejection:', reason);
-});
+process.on('uncaughtException', (err) => console.error('[cypher] Uncaught:', err));
+process.on('unhandledRejection', (reason) => console.error('[cypher] Rejection:', reason));

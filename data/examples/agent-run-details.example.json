@@ -1,8 +1,0 @@
-{
-  "agent_slug": "jarvis-claude",
-  "intent": "orchestrate",
-  "prompt_ref": "prompts/orchestrator.md",
-  "prompt_version": "1.0.0",
-  "routing_version": "1.0.0",
-  "attempt": 1
-}

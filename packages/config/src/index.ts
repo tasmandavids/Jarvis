@@ -1,10 +1,9 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-// JARVIS_REPO_ROOT is set by the Electron main process so the packaged app
-// can find config/ files. Falls back to cwd-relative resolution for plain
-// Next.js dev/production outside Electron.
-const REPO_ROOT = process.env.JARVIS_REPO_ROOT ?? join(process.cwd(), "../..");
+// Data lives at packages/config/data/ — resolve relative to this file so
+// Next.js standalone traces it correctly and Electron packaged builds work.
+const DATA_ROOT = join(__dirname, "..", "data");
 
 export type AgentConfig = {
   id: string;
@@ -161,23 +160,23 @@ function readJsonDir<T>(dir: string): T[] {
 }
 
 export function loadSystemConfig(): SystemConfig {
-  return readJson(join(REPO_ROOT, "config/system.json"));
+  return readJson(join(DATA_ROOT, "system.json"));
 }
 
 export function loadRoutingConfig(): RoutingConfig {
-  return readJson(join(REPO_ROOT, "config/routing.json"));
+  return readJson(join(DATA_ROOT, "routing.json"));
 }
 
 export function loadAgents(): AgentConfig[] {
-  return readJsonDir(join(REPO_ROOT, "config/agents"));
+  return readJsonDir(join(DATA_ROOT, "agents"));
 }
 
 export function loadIntegrations(): IntegrationConfig[] {
-  return readJsonDir(join(REPO_ROOT, "config/integrations"));
+  return readJsonDir(join(DATA_ROOT, "integrations"));
 }
 
 export function loadTaskStatusLabels(): string[] {
-  return readJson(join(REPO_ROOT, "config/task-status-labels.json"));
+  return readJson(join(DATA_ROOT, "task-status-labels.json"));
 }
 
 export function getDefaultIntent(): string {
@@ -291,11 +290,11 @@ export function buildAgentRunDetails(
 }
 
 export function loadSlackChannels(): SlackChannelsConfig {
-  return readJson(join(REPO_ROOT, "config/slack/channels.json"));
+  return readJson(join(DATA_ROOT, "slack/channels.json"));
 }
 
 export function loadSlackEvents(): SlackEventsConfig {
-  return readJson(join(REPO_ROOT, "config/slack/events.json"));
+  return readJson(join(DATA_ROOT, "slack/events.json"));
 }
 
 export function getSlackChannelEnvKey(channelId: string): string | undefined {
