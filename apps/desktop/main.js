@@ -3,6 +3,13 @@ const { spawn } = require('child_process');
 const path = require('path');
 const http = require('http');
 
+// Enforce single instance — if another CYPHER is already running, focus it and quit this one
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+  process.exit(0);
+}
+
 // Electron strips PATH — restore it so npm/node are findable
 process.env.PATH = [
   '/usr/local/bin', '/opt/homebrew/bin', '/usr/bin', '/bin',
@@ -13,10 +20,12 @@ const NEXT_PORT = 3005;
 const DEV_MODE  = process.env.NODE_ENV === 'development';
 
 // In dev: Next.js lives at apps/dashboard (sibling of apps/desktop)
-// In production (packaged): extraResources copies .next/standalone → Resources/dashboard
+// In production: extraResources copies .next/standalone → Resources/dashboard
+// outputFileTracingRoot mirrors the monorepo so server.js sits at
+// Resources/dashboard/apps/dashboard/server.js
 const NEXT_DIR = DEV_MODE
   ? path.join(__dirname, '..', 'dashboard')
-  : path.join(process.resourcesPath, 'dashboard');
+  : path.join(process.resourcesPath, 'dashboard', 'apps', 'dashboard');
 
 // Expose repo root to @jarvis/config so it can find config/*.json
 // In dev: two levels up from apps/desktop = repo root
@@ -172,6 +181,13 @@ async function bootstrap() {
 }
 
 app.whenReady().then(bootstrap);
+
+app.on('second-instance', () => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  }
+});
 
 app.on('activate', () => {
   // Only open a window if server is up and no window exists
