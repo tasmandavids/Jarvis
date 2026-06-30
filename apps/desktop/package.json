@@ -7,7 +7,7 @@
     "start": "electron .",
     "dev": "NODE_ENV=development electron .",
     "build": "electron-builder --mac",
-    "dist": "bash -lc 'cd ../.. && npm run build && cp apps/dashboard/.env.local apps/dashboard/.next/standalone/.env.local && cd apps/desktop && electron-builder --mac --publish never'"
+    "dist": "bash -lc 'cd ../.. && npm run build && cp apps/dashboard/.env.local apps/dashboard/.next/standalone/apps/dashboard/.env.local && cp -r apps/dashboard/.next/static apps/dashboard/.next/standalone/apps/dashboard/.next/static && cp -r apps/dashboard/public apps/dashboard/.next/standalone/apps/dashboard/public 2>/dev/null || true && cd apps/desktop && electron-builder --mac --publish never'"
   },
   "build": {
     "appId": "com.tasmandavids.cypher",
