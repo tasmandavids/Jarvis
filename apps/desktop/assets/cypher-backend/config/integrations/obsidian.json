@@ -1,0 +1,25 @@
+{
+  "id": "obsidian",
+  "name": "Obsidian Vault",
+  "status": "configured",
+  "owner_agent": "cypher",
+  "transport": "local-rest-api",
+  "auth": {
+    "type": "api_key",
+    "env_key": "OBSIDIAN_API_KEY",
+    "note": "Install 'Local REST API' community plugin in Obsidian"
+  },
+  "base_url_env": "OBSIDIAN_BASE_URL",
+  "vault_structure": {
+    "daily_log": "CYPHER/Daily/{{date}}.md",
+    "agent_threads": "CYPHER/Agents/{{agent}}/{{date}}.md",
+    "decisions": "CYPHER/Decisions/{{date}}-{{slug}}.md",
+    "briefings": "CYPHER/Briefings/{{date}}-morning.md"
+  },
+  "actions": [
+    "create_note",
+    "append_to_note",
+    "search_vault"
+  ],
+  "approval_required": []
+}

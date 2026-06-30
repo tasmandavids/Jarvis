@@ -1,0 +1,51 @@
+{
+  "name": "cypher-desktop",
+  "version": "1.0.0",
+  "description": "CYPHER — Personal Intelligence System",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "NODE_ENV=development electron .",
+    "build": "electron-builder --mac",
+    "dist": "bash -lc 'npm run build --prefix ../dashboard && cp ../dashboard/.env.local ../dashboard/.next/standalone/.env.local && electron-builder --mac --publish never'"
+  },
+  "build": {
+    "appId": "com.tasmandavids.cypher",
+    "productName": "CYPHER",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "assets/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ]
+    },
+    "dmg": {
+      "title": "CYPHER Installer"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "assets/**"
+    ],
+    "extraResources": [
+      {
+        "from": "../dashboard/.next/standalone",
+        "to": "dashboard",
+        "filter": ["**/*"]
+      }
+    ]
+  },
+  "dependencies": {
+    "electron-store": "^8.2.0"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  }
+}

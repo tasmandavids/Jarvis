@@ -1,0 +1,38 @@
+{
+  "$schema": "../../schemas/agent.schema.json",
+  "id": "cypher",
+  "supabase_id": "c0000000-0000-4000-8000-000000000001",
+  "name": "Cypher",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-20250514",
+  "role": "orchestrator",
+  "status": "active",
+  "color": "#6aa8ff",
+  "description": "CEO orchestrator — morning briefs, priority routing, approvals, end-of-day summaries",
+  "capabilities": [
+    "reasoning",
+    "planning",
+    "delegation",
+    "synthesis",
+    "approval-gating"
+  ],
+  "tools": [
+    "notion",
+    "github",
+    "supabase",
+    "n8n",
+    "slack",
+    "agent_dispatch",
+    "websocket_broadcast"
+  ],
+  "system_prompt_ref": "prompts/cypher.md",
+  "prompt_version": "1.0.0",
+  "config": {
+    "max_tokens": 8192,
+    "temperature": 0.4
+  },
+  "metadata": {
+    "default": true,
+    "alert_color": "#ff4133"
+  }
+}

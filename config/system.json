@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "name": "Jarvis Command Centre",
   "description": "AI agent orchestration hub",
-  "default_agent_id": "jarvis-claude",
+  "default_agent_id": "jarvis-groq-llama-70b",
   "timezone": "UTC",
   "data_paths": {
     "agents": "config/agents",

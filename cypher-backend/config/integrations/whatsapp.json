@@ -1,0 +1,23 @@
+{
+  "id": "whatsapp",
+  "name": "WhatsApp Business",
+  "status": "pending",
+  "owner_agent": "cypher",
+  "auth": {
+    "type": "bearer",
+    "env_key": "WHATSAPP_TOKEN",
+    "phone_number_id_env": "WHATSAPP_PHONE_NUMBER_ID"
+  },
+  "webhooks": {
+    "endpoint": "/api/webhooks/whatsapp",
+    "env_key": "WHATSAPP_WEBHOOK_VERIFY_TOKEN"
+  },
+  "actions": [
+    "read_messages",
+    "send_message"
+  ],
+  "approval_required": [
+    "send_message"
+  ],
+  "note": "Requires WhatsApp Business account and Meta app approval. Personal WA has no official API."
+}

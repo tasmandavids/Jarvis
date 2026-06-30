@@ -1,0 +1,36 @@
+{
+  "$schema": "../../schemas/agent.schema.json",
+  "id": "theron",
+  "supabase_id": "c0000000-0000-4000-8000-000000000006",
+  "name": "Theron",
+  "provider": "google",
+  "model": "gemini-2.5-pro",
+  "role": "specialist",
+  "status": "active",
+  "color": "#ffc24d",
+  "description": "Research & Intel — news monitoring, competitive analysis, market summaries, one-page briefs",
+  "capabilities": [
+    "research",
+    "summarisation",
+    "competitive-analysis",
+    "market-monitoring"
+  ],
+  "tools": [
+    "supabase",
+    "n8n",
+    "slack",
+    "web_search",
+    "rss_feeds",
+    "markets_api"
+  ],
+  "system_prompt_ref": "prompts/theron.md",
+  "prompt_version": "1.0.0",
+  "config": {
+    "max_tokens": 16384,
+    "temperature": 0.3
+  },
+  "metadata": {
+    "scan_schedule": "0 6 * * *",
+    "sources_limit": 50
+  }
+}

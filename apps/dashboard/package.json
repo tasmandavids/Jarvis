@@ -9,9 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.107.0",
+    "@google/generative-ai": "^0.24.1",
     "@jarvis/config": "*",
     "@supabase/supabase-js": "^2.49.8",
     "next": "^15.3.3",
+    "openai": "^6.45.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

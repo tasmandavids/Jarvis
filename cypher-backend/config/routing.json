@@ -1,0 +1,134 @@
+{
+  "version": "2.0.0",
+  "default_agent_id": "cypher",
+  "routes": [
+    {
+      "intent": "orchestrate",
+      "agent_id": "cypher",
+      "fallback_agent_id": "jarvis-claude",
+      "description": "Planning, delegation, briefings, multi-step reasoning"
+    },
+    {
+      "intent": "infra",
+      "agent_id": "orion",
+      "fallback_agent_id": "cypher",
+      "description": "Server health, Vercel, GitHub CI, deployments"
+    },
+    {
+      "intent": "finance",
+      "agent_id": "sable",
+      "fallback_agent_id": "cypher",
+      "description": "MRR, cashflow, invoices, Stripe, Xero"
+    },
+    {
+      "intent": "personal",
+      "agent_id": "vesper",
+      "fallback_agent_id": "cypher",
+      "description": "Health, calendar, reminders, personal tasks"
+    },
+    {
+      "intent": "ads",
+      "agent_id": "morrigan",
+      "fallback_agent_id": "cypher",
+      "description": "Campaigns, ROAS, creative, funnel analysis"
+    },
+    {
+      "intent": "research",
+      "agent_id": "theron",
+      "fallback_agent_id": "jarvis-gemini",
+      "description": "News, market intel, competitive research, briefs"
+    },
+    {
+      "intent": "execute",
+      "agent_id": "jarvis-openai",
+      "fallback_agent_id": "cypher",
+      "description": "Tool calls, structured output, API actions"
+    },
+    {
+      "intent": "review",
+      "agent_id": "jarvis-claude",
+      "description": "Code and output review"
+    }
+  ],
+  "intent_detection": {
+    "mode": "keyword",
+    "default_intent": "orchestrate",
+    "keywords": {
+      "infra": [
+        "server",
+        "deploy",
+        "vercel",
+        "github",
+        "ci",
+        "latency",
+        "uptime",
+        "build",
+        "prod",
+        "orion"
+      ],
+      "finance": [
+        "money",
+        "invoice",
+        "revenue",
+        "mrr",
+        "stripe",
+        "xero",
+        "cashflow",
+        "runway",
+        "burn",
+        "payout",
+        "sable"
+      ],
+      "personal": [
+        "health",
+        "sleep",
+        "steps",
+        "calendar",
+        "reminder",
+        "walk",
+        "gym",
+        "vesper",
+        "wellbeing"
+      ],
+      "ads": [
+        "ads",
+        "campaign",
+        "roas",
+        "cpc",
+        "facebook",
+        "google ads",
+        "creative",
+        "morrigan",
+        "budget"
+      ],
+      "research": [
+        "research",
+        "news",
+        "market",
+        "summarize",
+        "analyze",
+        "compare",
+        "rbnz",
+        "competitor",
+        "theron"
+      ],
+      "execute": [
+        "run",
+        "execute",
+        "create issue",
+        "update",
+        "push"
+      ],
+      "orchestrate": [
+        "brief",
+        "plan",
+        "coordinate",
+        "what's",
+        "how are",
+        "overview",
+        "summary",
+        "cypher"
+      ]
+    }
+  }
+}

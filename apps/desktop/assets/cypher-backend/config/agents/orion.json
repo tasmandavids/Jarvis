@@ -1,0 +1,35 @@
+{
+  "$schema": "../../schemas/agent.schema.json",
+  "id": "orion",
+  "supabase_id": "c0000000-0000-4000-8000-000000000002",
+  "name": "Orion",
+  "provider": "anthropic",
+  "model": "claude-haiku-4-20250514",
+  "role": "specialist",
+  "status": "active",
+  "color": "#34d2c4",
+  "description": "Infra & DevOps — Vercel analytics, GitHub CI, server health, deployment oversight",
+  "capabilities": [
+    "monitoring",
+    "alerting",
+    "deployment",
+    "code-review"
+  ],
+  "tools": [
+    "github",
+    "supabase",
+    "n8n",
+    "slack",
+    "vercel_api",
+    "uptime_api"
+  ],
+  "system_prompt_ref": "prompts/orion.md",
+  "prompt_version": "1.0.0",
+  "config": {
+    "max_tokens": 4096,
+    "temperature": 0.2
+  },
+  "metadata": {
+    "poll_interval_seconds": 60
+  }
+}

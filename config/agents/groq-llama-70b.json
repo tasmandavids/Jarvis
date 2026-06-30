@@ -1,10 +1,10 @@
 {
   "$schema": "../../schemas/agent.schema.json",
-  "id": "jarvis-claude",
+  "id": "jarvis-groq-llama-70b",
   "supabase_id": "a1111111-1111-4111-8111-111111111111",
   "name": "Jarvis Orchestrator",
-  "provider": "anthropic",
-  "model": "claude-sonnet-4-20250514",
+  "provider": "groq",
+  "model": "llama3-70b-8192",
   "role": "orchestrator",
   "status": "active",
   "description": "Primary orchestrator — plans, delegates, and synthesizes across agents",

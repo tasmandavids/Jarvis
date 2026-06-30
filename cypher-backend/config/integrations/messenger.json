@@ -1,0 +1,25 @@
+{
+  "id": "messenger",
+  "name": "Facebook Messenger",
+  "status": "pending",
+  "owner_agent": "cypher",
+  "auth": {
+    "type": "oauth2",
+    "scopes": [
+      "pages_messaging"
+    ],
+    "env_key": "META_ACCESS_TOKEN"
+  },
+  "webhooks": {
+    "endpoint": "/api/webhooks/meta",
+    "env_key": "META_WEBHOOK_SECRET"
+  },
+  "actions": [
+    "read_messages",
+    "send_message"
+  ],
+  "approval_required": [
+    "send_message"
+  ],
+  "note": "Shares META_ACCESS_TOKEN and webhook endpoint with Instagram connector."
+}

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;padding:0;background:#020203;overflow:hidden;}
+  *{box-sizing:border-box;}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+  @keyframes caret{0%,49%{opacity:1}50%,100%{opacity:0}}
+  @keyframes micpulse{0%,100%{box-shadow:0 0 14px var(--glow),inset 0 0 12px color-mix(in srgb,var(--acc) 22%,transparent)}50%{box-shadow:0 0 26px var(--glow),inset 0 0 20px color-mix(in srgb,var(--acc) 35%,transparent)}}
+</style>
+</helmet>
+
+<div ref="{{ setStage }}" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#020203;--acc:#ffa64d;--acc-hot:#ffd9a0;--glow:rgba(255,150,60,.5);--dim:rgba(255,193,142,.52);--txt:#ffdcb0;--ok:#5fe08a;--bad:#ff6a5c;">
+  <div ref="{{ setStageInner }}" style="position:absolute;width:1920px;height:1080px;transform-origin:center center;background:radial-gradient(125% 105% at 50% 42%,#0c0805 0%,#070506 46%,#030304 100%);overflow:hidden;">
+
+    <div style="position:absolute;inset:0;background-image:linear-gradient(color-mix(in srgb,var(--acc) 60%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--acc) 60%,transparent) 1px,transparent 1px);background-size:54px 54px;opacity:var(--grid,.05);transition:opacity 1.2s ease;-webkit-mask:radial-gradient(circle at 50% 43%,transparent 18%,rgba(0,0,0,.5) 44%,#000 80%);mask:radial-gradient(circle at 50% 43%,transparent 18%,rgba(0,0,0,.5) 44%,#000 80%);pointer-events:none;"></div>
+    <div style="position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 50%,transparent 54%,rgba(0,0,0,.55) 100%);pointer-events:none;"></div>
+
+    <canvas ref="{{ setCoreCanvas }}" style="position:absolute;left:370px;top:-104px;width:1180px;height:1180px;pointer-events:auto;"></canvas>
+
+    <div style="position:absolute;top:18px;left:18px;width:36px;height:36px;border-left:2px solid color-mix(in srgb,var(--acc) 50%,transparent);border-top:2px solid color-mix(in srgb,var(--acc) 50%,transparent);"></div>
+    <div style="position:absolute;top:18px;right:18px;width:36px;height:36px;border-right:2px solid color-mix(in srgb,var(--acc) 50%,transparent);border-top:2px solid color-mix(in srgb,var(--acc) 50%,transparent);"></div>
+    <div style="position:absolute;bottom:18px;left:18px;width:36px;height:36px;border-left:2px solid color-mix(in srgb,var(--acc) 50%,transparent);border-bottom:2px solid color-mix(in srgb,var(--acc) 50%,transparent);"></div>
+    <div style="position:absolute;bottom:18px;right:18px;width:36px;height:36px;border-right:2px solid color-mix(in srgb,var(--acc) 50%,transparent);border-bottom:2px solid color-mix(in srgb,var(--acc) 50%,transparent);"></div>
+
+    <!-- HEADER -->
+    <div style="position:absolute;top:28px;left:42px;right:42px;display:flex;justify-content:space-between;align-items:flex-start;">
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="width:34px;height:34px;transform:rotate(45deg);border:1.5px solid var(--acc);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px var(--glow),inset 0 0 10px color-mix(in srgb,var(--acc) 30%,transparent);"><div style="width:9px;height:9px;background:var(--acc-hot);box-shadow:0 0 10px var(--acc-hot);"></div></div>
+        <div>
+          <div style="font:700 27px 'Rajdhani',sans-serif;letter-spacing:10px;color:var(--txt);line-height:1;">CYPHER</div>
+          <div style="font:500 10px 'JetBrains Mono',monospace;letter-spacing:3px;color:var(--dim);margin-top:5px;">PERSONAL INTELLIGENCE CORE · v3.1</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font:600 31px 'JetBrains Mono',monospace;color:var(--txt);letter-spacing:2px;line-height:1;">{{ time }}</div>
+        <div style="font:500 11px 'Rajdhani',sans-serif;letter-spacing:3px;color:var(--dim);margin-top:6px;">{{ date }}</div>
+        <div style="display:flex;gap:16px;justify-content:flex-end;margin-top:9px;font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.5px;color:var(--dim);"><span style="color:var(--ok);">● 9 SYSTEMS LINKED</span><span>6 AGENTS ONLINE</span><span>LAT {{ latency }}ms</span></div>
+      </div>
+    </div>
+
+    <!-- MODE SELECTOR -->
+    <div style="position:absolute;top:94px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:9px;z-index:5;">
+      <span style="font:600 10px 'Rajdhani',sans-serif;letter-spacing:3px;color:var(--dim);margin-right:4px;">COGNITIVE STATE</span>
+      <sc-for list="{{ modes }}" as="m" hint-placeholder-count="5"><button onClick="{{ m.onClick }}" style="{{ m.style }}">{{ m.label }}</button></sc-for>
+      <button onClick="{{ resumeAuto }}" style="{{ autoStyle }}">▶ AUTO</button><button onClick="{{ toggleLinks }}" style="{{ linksStyle }}">{{ linksLabel }}</button>
+    </div>
+
+    <!-- ===== LEFT COLUMN ===== -->
+    <!-- INBOX -->
+    <div style="position:absolute;left:42px;top:150px;width:392px;height:230px;overflow:hidden;padding:13px 18px;background:linear-gradient(160deg,rgba(255,150,60,.05),rgba(255,110,30,.012));border:1px solid color-mix(in srgb,var(--acc) 20%,transparent);box-shadow:inset 0 0 30px rgba(255,120,40,.045);backdrop-filter:blur(4px);clip-path:polygon(0 14px,14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;"><div style="display:flex;align-items:center;gap:9px;"><div style="width:5px;height:14px;background:var(--acc);box-shadow:0 0 8px var(--glow);"></div><span style="font:600 12px 'Rajdhani',sans-serif;letter-spacing:3px;color:color-mix(in srgb,var(--acc) 90%,#fff);text-transform:uppercase;">Inbox · Mail</span></div><span style="font:600 10px 'JetBrains Mono',monospace;color:var(--acc-hot);border:1px solid color-mix(in srgb,var(--acc) 35%,transparent);padding:2px 7px;">{{ unread }} UNREAD</span></div>
+      <sc-for list="{{ emails }}" as="e" hint-placeholder-count="3"><div style="display:flex;gap:11px;align-items:flex-start;padding:6px 0;border-top:1px solid color-mix(in srgb,var(--acc) 9%,transparent);"><div style="width:7px;height:7px;margin-top:5px;border-radius:50%;background: {{ e.dot }};box-shadow:0 0 7px {{ e.dot }};flex:none;opacity: {{ e.op }};"></div><div style="flex:1;min-width:0;"><div style="display:flex;justify-content:space-between;gap:8px;"><span style="font:600 13px 'Rajdhani',sans-serif;color:var(--txt);letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.sender }}</span><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--dim);flex:none;">{{ e.time }}</span></div><div style="font:400 12px 'JetBrains Mono',monospace;color:var(--dim);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.subject }}</div></div></div></sc-for>
+    </div>
+
+    <!-- PHONE -->
+    <div style="position:absolute;left:42px;top:392px;width:392px;height:164px;overflow:hidden;padding:13px 18px;background:linear-gradient(160deg,rgba(255,150,60,.05),rgba(255,110,30,.012));border:1px solid color-mix(in srgb,var(--acc) 20%,transparent);box-shadow:inset 0 0 30px rgba(255,120,40,.045);backdrop-filter:blur(4px);clip-path:polygon(0 14px,14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;"><div style="display:flex;align-items:center;gap:9px;"><div style="width:5px;height:14px;background:var(--acc);box-shadow:0 0 8px var(--glow);"></div><span style="font:600 12px 'Rajdhani',sans-serif;letter-spacing:3px;color:color-mix(in srgb,var(--acc) 90%,#fff);text-transform:uppercase;">Phone · Notifications</span></div><span style="display:flex;align-items:center;gap:6px;font:500 9px 'JetBrains Mono',monospace;letter-spacing:1px;color:var(--ok);"><span style="width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 7px var(--ok);animation:blink 1.7s infinite;"></span>iPHONE LINKED</span></div>
+      <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="3"><div style="display:flex;gap:11px;align-items:center;padding:6px 0;border-top:1px solid color-mix(in srgb,var(--acc) 9%,transparent);"><div style="width:24px;height:24px;flex:none;border:1px solid {{ n.color }};display:flex;align-items:center;justify-content:center;clip-path:polygon(0 5px,5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%);"><span style="font:700 9px 'Rajdhani',sans-serif;letter-spacing:.5px;color: {{ n.color }};">{{ n.icon }}</span></div><div style="flex:1;min-width:0;"><div style="font:500 13px 'Rajdhani',sans-serif;color:var(--txt);letter-spacing:.2px;">{{ n.title }}</div><div style="font:400 11px 'JetBrains Mono',monospace;color:var(--dim);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ n.sub }}</div></div><span style="font:500 10px 'JetBrains Mono',monospace;color:var(--dim);flex:none;">{{ n.time }}</span></div></sc-for>
+    </div>
+
+    <!-- HEALTH (Vesper) -->
+    <div style="position:absolute;left:42px;top:568px;width:392px;height:132px;overflow:hidden;padding:13px 18px;background:linear-gradient(160deg,rgba(176,124,255,.06),rgba(120,80,200,.015));border:1px solid color-mix(in srgb,#b07cff 22%,transparent);box-shadow:inset 0 0 30px rgba(150,100,255,.05);backdrop-filter:blur(4px);clip-path:polygon(0 14px,14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;"><div style="display:flex;align-items:center;gap:9px;"><div style="width:5px;height:14px;background:#b07cff;box-shadow:0 0 8px rgba(176,124,255,.6);"></div><span style="font:600 12px 'Rajdhani',sans-serif;letter-spacing:3px;color:#d7c2ff;text-transform:uppercase;">Health · Life</span></div><span style="display:flex;align-items:center;gap:6px;font:500 9px 'JetBrains Mono',monospace;letter-spacing:1px;color:#b07cff;"><span style="width:6px;height:6px;border-radius:50%;background:#b07cff;box-shadow:0 0 7px #b07cff;animation:blink 1.7s infinite;"></span>VESPER</span></div>
+      <div style="display:flex;gap:9px;margin-bottom:9px;"><sc-for list="{{ health }}" as="h" hint-placeholder-count="3"><div style="flex:1;border:1px solid color-mix(in srgb,#b07cff 16%,transparent);padding:7px 9px;clip-path:polygon(0 5px,5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%);"><div style="font:600 9px 'Rajdhani',sans-serif;letter-spacing:1px;color:#a98fd6;text-transform:uppercase;">{{ h.label }}</div><div style="font:600 18px 'Rajdhani',sans-serif;color:#f0e8ff;margin-top:1px;line-height:1;">{{ h.val }}</div></div></sc-for></div>
+      <div style="display:flex;align-items:center;gap:9px;font:500 12px 'JetBrains Mono',monospace;color:#cdb6ff;"><span style="width:6px;height:6px;background:#b07cff;transform:rotate(45deg);flex:none;box-shadow:0 0 6px #b07cff;"></span>{{ healthReminder }}</div>
+    </div>
+
+    <!-- WIRE: MARKETS + NEWS (Theron) -->
+    <div style="position:absolute;left:42px;top:704px;width:392px;height:156px;overflow:hidden;padding:13px 18px;background:linear-gradient(160deg,rgba(255,150,60,.05),rgba(255,110,30,.012));border:1px solid color-mix(in srgb,var(--acc) 20%,transparent);box-shadow:inset 0 0 30px rgba(255,120,40,.045);backdrop-filter:blur(4px);clip-path:polygon(0 14px,14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;"><div style="display:flex;align-items:center;gap:9px;"><div style="width:5px;height:14px;background:var(--acc);box-shadow:0 0 8px var(--glow);"></div><span style="font:600 12px 'Rajdhani',sans-serif;letter-spacing:3px;color:color-mix(in srgb,var(--acc) 90%,#fff);text-transform:uppercase;">Wire · Markets & Intel</span></div><span style="display:flex;align-items:center;gap:6px;font:500 9px 'JetBrains Mono',monospace;letter-spacing:1px;color:#ffc24d;"><span style="width:6px;height:6px;border-radius:50%;background:#ffc24d;box-shadow:0 0 7px #ffc24d;animation:blink 1.7s infinite;"></span>THERON</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-bottom:9px;"><sc-for list="{{ markets }}" as="mk2" hint-placeholder-count="4"><div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid color-mix(in srgb,var(--acc) 8%,transparent);padding-bottom:3px;"><div><div style="font:600 12px 'Rajdhani',sans-serif;letter-spacing:.5px;color:var(--txt);">{{ mk2.sym }}</div><div style="font:500 10px 'JetBrains Mono',monospace;color:var(--dim);">{{ mk2.priceStr }}</div></div><span style="font:500 11px 'JetBrains Mono',monospace;color: {{ mk2.color }};">{{ mk2.chgStr }}</span></div></sc-for></div>
+      <sc-for list="{{ news }}" as="nw" hint-placeholder-count="2"><div style="padding:6px 0;border-top:1px solid color-mix(in srgb,var(--acc) 9%,transparent);"><div style="display:flex;gap:8px;align-items:center;margin-bottom:2px;"><span style="font:600 9px 'Rajdhani',sans-serif;letter-spacing:1.5px;color:var(--acc);border:1px solid color-mix(in srgb,var(--acc) 35%,transparent);padding:1px 6px;">{{ nw.tag }}</span><span style="font:500 10px 'JetBrains Mono',monospace;color:var(--dim);">{{ nw.time }}</span></div><div style="font:500 12px 'Rajdhani',sans-serif;color:var(--txt);line-height:1.3;letter-spacing:.2px;">{{ nw.head }}</div></div></sc-for>
+    </div>
+
+    <!-- ===== RIGHT COLUMN ===== -->
+    <!-- OLUNE -->
+    <div style="position:absolute;right:42px;top:150px;width:392px;padding:13px 18px;background:linear-gradient(160deg,rgba(255,150,60,.05),rgba(255,110,30,.012));border:1px solid color-mix(in srgb,var(--acc) 20%,transparent);box-shadow:inset 0 0 30px rgba(255,120,40,.045);backdrop-filter:blur(4px);clip-path:polygon(0 14px,14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;"><div style="display:flex;align-items:center;gap:9px;"><div style="width:5px;height:14px;background:var(--acc);box-shadow:0 0 8px var(--glow);"></div><span style="font:600 12px 'Rajdhani',sans-serif;letter-spacing:3px;color:color-mix(in srgb,var(--acc) 90%,#fff);text-transform:uppercase;">Olune · Studio OS</span></div><span style="display:flex;align-items:center;gap:6px;font:500 9px 'JetBrains Mono',monospace;letter-spacing:1px;color:var(--ok);"><span style="width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 7px var(--ok);animation:blink 1.7s infinite;"></span>LIVE · {{ oluneSync }}</span></div>
+      <div style="font:400 10px 'JetBrains Mono',monospace;color:var(--dim);margin-bottom:10px;">⎇ NZAD · main · 80613ac · Vercel ✓ · Orion watching</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 10px;"><sc-for list="{{ oluneCells }}" as="o" hint-placeholder-count="6"><div><div style="font:600 9px 'Rajdhani',sans-serif;letter-spacing:1px;color:var(--dim);text-transform:uppercase;">{{ o.label }}</div><div style="font:600 19px 'Rajdhani',sans-serif;color:var(--txt);margin-top:1px;line-height:1;">{{ o.val }}</div><div style="font:500 10px 'JetBrains Mono',monospace;color: {{ o.dColor }};margin-top:2px;">{{ o.delta }}</div></div></sc-for></div>
+    </div>
+
+    <!-- NOVA -->
+    <div style="position:absolute;right:42px;top:368px;width:392px;padding:13px 18px;background:linear-gradient(160deg,rgba(255,150,60,.05),rgba(255,110,30,.012));border:1px solid color-mix(in srgb,var(--acc) 20%,transparent);box-shadow:inset 0 0 30px rgba(255,120,40,.045);backdrop-filter:blur(4px);clip-path:polygon(0 14px,14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div style="display:flex;align-items:center;gap:9px;"><div style="width:5px;height:14px;background:var(--acc);box-shadow:0 0 8px var(--glow);"></div><span style="font:600 12px 'Rajdhani',sans-serif;letter-spacing:3px;color:color-mix(in srgb,var(--acc) 90%,#fff);text-transform:uppercase;">Nova Dance Academy</span></div><span style="display:flex;align-items:center;gap:6px;font:500 9px 'JetBrains Mono',monospace;letter-spacing:1px;color:var(--ok);"><span style="width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 7px var(--ok);animation:blink 1.7s infinite;"></span>LIVE · {{ novaSync }}</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:10px;"><sc-for list="{{ novaCells }}" as="nc" hint-placeholder-count="4"><div><div style="font:600 9px 'Rajdhani',sans-serif;letter-spacing:.5px;color:var(--dim);text-transform:uppercase;">{{ nc.label }}</div><div style="font:600 17px 'Rajdhani',sans-serif;color:var(--txt);margin-top:1px;line-height:1;">{{ nc.val }}</div></div></sc-for></div>
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;"><div style="font:600 9px 'Rajdhani',sans-serif;letter-spacing:1px;color:var(--dim);text-transform:uppercase;margin-bottom:4px;">Classes Now</div><sc-for list="{{ novaClasses }}" as="cl" hint-placeholder-count="2"><div style="display:flex;gap:8px;align-items:baseline;margin-bottom:3px;"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--acc);">{{ cl.time }}</span><span style="font:500 12px 'Rajdhani',sans-serif;color:var(--txt);letter-spacing:.2px;">{{ cl.name }}</span></div></sc-for></div>
+        <div style="flex:1;"><div style="font:600 9px 'Rajdhani',sans-serif;letter-spacing:1px;color:var(--dim);text-transform:uppercase;margin-bottom:4px;">Upcoming</div><sc-for list="{{ novaEvents }}" as="ev" hint-placeholder-count="2"><div style="display:flex;gap:8px;align-items:baseline;margin-bottom:3px;"><span style="font:500 11px 'JetBrains Mono',monospace;color:var(--acc);">{{ ev.date }}</span><span style="font:500 12px 'Rajdhani',sans-serif;color:var(--txt);letter-spacing:.2px;">{{ ev.name }}</span></div></sc-for></div>
+      </div>
+    </div>
+
+    <!-- INFRA (Orion) -->
+    <div style="position:absolute;right:42px;top:556px;width:392px;padding:13px 18px;background:linear-gradient(160deg,rgba(52,210,196,.05),rgba(30,140,130,.014));border:1px solid color-mix(in srgb,#34d2c4 22%,transparent);box-shadow:inset 0 0 30px rgba(52,210,196,.04);backdrop-filter:blur(4px);clip-path:polygon(0 14px,14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;"><div style="display:flex;align-items:center;gap:9px;"><div style="width:5px;height:14px;background:#34d2c4;box-shadow:0 0 8px rgba(52,210,196,.6);"></div><span style="font:600 12px 'Rajdhani',sans-serif;letter-spacing:3px;color:#9fece4;text-transform:uppercase;">Infra · Vercel</span></div><span style="display:flex;align-items:center;gap:6px;font:500 9px 'JetBrains Mono',monospace;letter-spacing:1px;color:#34d2c4;"><span style="width:6px;height:6px;border-radius:50%;background:#34d2c4;box-shadow:0 0 7px #34d2c4;animation:blink 1.7s infinite;"></span>ORION</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;"><sc-for list="{{ infraCells }}" as="ic" hint-placeholder-count="4"><div><div style="font:600 9px 'Rajdhani',sans-serif;letter-spacing:.5px;color:#7fb8b2;text-transform:uppercase;">{{ ic.label }}</div><div style="font:600 17px 'Rajdhani',sans-serif;color:#e6fffb;margin-top:1px;line-height:1;">{{ ic.val }}</div></div></sc-for></div>
+    </div>
+
+    <!-- FINANCE (Sable) -->
+    <div style="position:absolute;right:42px;top:706px;width:392px;padding:13px 18px;background:linear-gradient(160deg,rgba(70,210,126,.05),rgba(30,150,90,.014));border:1px solid color-mix(in srgb,#46d27e 22%,transparent);box-shadow:inset 0 0 30px rgba(70,210,126,.04);backdrop-filter:blur(4px);clip-path:polygon(0 14px,14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;"><div style="display:flex;align-items:center;gap:9px;"><div style="width:5px;height:14px;background:#46d27e;box-shadow:0 0 8px rgba(70,210,126,.6);"></div><span style="font:600 12px 'Rajdhani',sans-serif;letter-spacing:3px;color:#a9eec4;text-transform:uppercase;">Finance · Cashflow</span></div><span style="display:flex;align-items:center;gap:6px;font:500 9px 'JetBrains Mono',monospace;letter-spacing:1px;color:#46d27e;"><span style="width:6px;height:6px;border-radius:50%;background:#46d27e;box-shadow:0 0 7px #46d27e;animation:blink 1.7s infinite;"></span>SABLE</span></div>
+      <div style="display:flex;gap:14px;align-items:flex-end;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;flex:1;"><sc-for list="{{ financeCells }}" as="fc" hint-placeholder-count="4"><div><div style="font:600 9px 'Rajdhani',sans-serif;letter-spacing:.5px;color:#7fc79b;text-transform:uppercase;">{{ fc.label }}</div><div style="font:600 16px 'Rajdhani',sans-serif;color:#e9fff1;margin-top:1px;line-height:1;">{{ fc.val }}</div></div></sc-for></div>
+        <svg width="96" height="44" viewBox="0 0 96 44" preserveAspectRatio="none" style="flex:none;overflow:visible;"><polyline points="{{ financeSpark }}" fill="none" stroke="#46d27e" stroke-width="1.5" stroke-linejoin="round" style="filter:drop-shadow(0 0 4px rgba(70,210,126,.6));"></polyline></svg>
+      </div>
+    </div>
+
+    <!-- ===== COMMAND BAR ===== -->
+    <div style="position:absolute;left:50%;bottom:134px;transform:translateX(-50%);width:1000px;max-width:calc(100% - 90px);">
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:11px;"><div style="width:7px;height:7px;border-radius:50%;background: {{ statusColor }};box-shadow:0 0 10px {{ statusColor }};animation:blink 1.7s infinite;"></div><span style="font:600 12px 'Rajdhani',sans-serif;letter-spacing:5px;color: {{ statusColor }};text-transform:uppercase;">{{ statusWord }}</span><span style="margin-left:18px;font:500 10px 'JetBrains Mono',monospace;letter-spacing:1.5px;color:var(--ok);">◆ OBSIDIAN · {{ obsidianCount }} LOGGED · {{ obsidianLast }}</span></div>
+      <div style="display:flex;align-items:center;gap:20px;padding:16px 22px;background:linear-gradient(120deg,rgba(255,150,60,.07),rgba(255,110,30,.02));border:1px solid color-mix(in srgb,var(--acc) 24%,transparent);box-shadow:inset 0 0 44px rgba(255,120,40,.05),0 0 34px rgba(255,120,40,.06);backdrop-filter:blur(7px);clip-path:polygon(0 16px,16px 0,100% 0,100% calc(100% - 16px),calc(100% - 16px) 100%,0 100%);">
+        <div style="width:46px;height:46px;border-radius:50%;border:1.5px solid var(--acc);display:flex;align-items:center;justify-content:center;flex:none;animation:micpulse 2.4s ease-in-out infinite;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="var(--acc-hot)" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11.5" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0"></path><line x1="12" y1="18" x2="12" y2="21.5"></line></svg></div>
+        <div style="flex:1;min-width:0;"><div style="font:600 10px 'Rajdhani',sans-serif;letter-spacing:3px;color:var(--acc);text-transform:uppercase;margin-bottom:3px;">{{ speaker }}</div><div style="font:400 16px 'JetBrains Mono',monospace;color:var(--txt);line-height:1.45;min-height:46px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ text }}<span style="display:inline-block;width:8px;height:15px;background:var(--acc);margin-left:3px;vertical-align:-2px;animation:caret 1s steps(1) infinite;"></span></div></div>
+        <canvas ref="{{ setWaveCanvas }}" style="width:200px;height:42px;flex:none;"></canvas>
+      </div>
+    </div>
+
+    <!-- MESSAGES (bottom-right) -->
+    <div style="position:absolute;right:42px;bottom:24px;width:392px;height:196px;padding:12px 18px;background:linear-gradient(160deg,rgba(255,150,60,.05),rgba(255,110,30,.012));border:1px solid color-mix(in srgb,var(--acc) 20%,transparent);box-shadow:inset 0 0 30px rgba(255,120,40,.045);backdrop-filter:blur(4px);clip-path:polygon(0 14px,14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;"><div style="display:flex;align-items:center;gap:9px;"><div style="width:5px;height:14px;background:var(--acc);box-shadow:0 0 8px var(--glow);"></div><span style="font:600 12px 'Rajdhani',sans-serif;letter-spacing:3px;color:color-mix(in srgb,var(--acc) 90%,#fff);text-transform:uppercase;">Messages · Unified</span></div><span style="font:600 10px 'JetBrains Mono',monospace;color:var(--acc-hot);border:1px solid color-mix(in srgb,var(--acc) 35%,transparent);padding:2px 7px;">{{ msgNew }} NEW</span></div>
+      <div style="display:flex;gap:6px;margin-bottom:7px;"><sc-for list="{{ channels }}" as="ch" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:5px;padding:3px 8px;border:1px solid color-mix(in srgb, {{ ch.color }} 38%,transparent);clip-path:polygon(0 4px,4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%);"><span style="width:6px;height:6px;border-radius:50%;background: {{ ch.color }};box-shadow:0 0 6px {{ ch.color }};"></span><span style="font:700 9px 'Rajdhani',sans-serif;letter-spacing:.5px;color: {{ ch.color }};">{{ ch.tag }}</span></div></sc-for></div>
+      <sc-for list="{{ messages }}" as="ms" hint-placeholder-count="4"><div style="display:flex;gap:10px;align-items:center;padding:4px 0;border-top:1px solid color-mix(in srgb,var(--acc) 9%,transparent);"><div style="width:22px;height:22px;flex:none;border:1px solid {{ ms.color }};display:flex;align-items:center;justify-content:center;clip-path:polygon(0 4px,4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%);"><span style="font:700 8px 'Rajdhani',sans-serif;color: {{ ms.color }};">{{ ms.tag }}</span></div><div style="flex:1;min-width:0;"><div style="display:flex;justify-content:space-between;gap:8px;"><span style="font:600 12px 'Rajdhani',sans-serif;color:var(--txt);letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ ms.from }}</span><span style="font:500 10px 'JetBrains Mono',monospace;color:var(--dim);flex:none;">{{ ms.time }}</span></div><div style="font:400 11px 'JetBrains Mono',monospace;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ ms.text }}</div></div></div></sc-for>
+    </div>
+
+    <!-- ===== AGENT RAIL ===== -->
+    <div style="position:absolute;left:50%;bottom:26px;transform:translateX(-50%);display:flex;gap:10px;">
+      <sc-for list="{{ agents }}" as="ag" hint-placeholder-count="6">
+        <button onClick="{{ ag.onClick }}" style="{{ ag.style }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;"><span style="font:700 13px 'Rajdhani',sans-serif;letter-spacing:1.5px;color: {{ ag.nameColor }};">{{ ag.name }}</span><span style="width:7px;height:7px;border-radius:50%;background: {{ ag.color }};box-shadow:0 0 8px {{ ag.color }};opacity: {{ ag.dotOp }};"></span></div>
+          <div style="font:600 9px 'Rajdhani',sans-serif;letter-spacing:1.5px;color: {{ ag.color }};text-transform:uppercase;margin-bottom:4px;">{{ ag.role }}</div>
+          <div style="font:400 10px 'JetBrains Mono',monospace;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ ag.status }}</div>
+        </button>
+      </sc-for>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1280, &quot;height&quot;: 720 },
+  &quot;particleDensity&quot;: { &quot;editor&quot;: &quot;range&quot;, &quot;min&quot;: 0.6, &quot;max&quot;: 1.4, &quot;step&quot;: 0.1, &quot;default&quot;: 1, &quot;tsType&quot;: &quot;number&quot;, &quot;unit&quot;: &quot;x&quot;, &quot;section&quot;: &quot;Appearance&quot; },
+  &quot;motionSpeed&quot;: { &quot;editor&quot;: &quot;range&quot;, &quot;min&quot;: 0.5, &quot;max&quot;: 1.6, &quot;step&quot;: 0.1, &quot;default&quot;: 1, &quot;tsType&quot;: &quot;number&quot;, &quot;unit&quot;: &quot;x&quot;, &quot;section&quot;: &quot;Motion&quot; },
+  &quot;autoDemo&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Behavior&quot; }
+}">
+class Component extends DCLogic {
+  state = {
+    mode: 'idle', agentIdx: 5, linksOn: false, obsidianCount: 0, obsidianLast: 'vault ready',
+    time: '--:--:--', date: '', latency: 11,
+    speaker: 'CYPHER', text: 'All systems nominal. Standing by.',
+    tickN: 0,
+    emails: [
+      { sender: 'Stripe', subject: 'Payout $2,480.00 sent to your bank', time: '2m', unread: true, k: 'ok' },
+      { sender: 'Olune · System', subject: '3 new trial signups overnight', time: '14m', unread: true, k: 'acc' },
+      { sender: 'Nova — R. Whitley', subject: 'Re: Vaganova Master Class spots', time: '31m', unread: true, k: 'acc' },
+      { sender: 'Xero', subject: '2 invoices now overdue', time: '1h', unread: true, k: 'bad' },
+      { sender: 'RAD Examinations', subject: 'September exam booking confirmed', time: '2h', unread: false, k: 'acc' },
+    ],
+    notifs: [
+      { icon: 'iM', title: 'Mum', sub: 'Are we still on for Sunday lunch?', time: '5m', color: '#46d27e' },
+      { icon: 'CAL', title: 'Calendar', sub: 'Design review in 40 minutes', time: '9m', color: '#ffa64d' },
+      { icon: 'SL', title: 'Slack · Olune', sub: 'Deploy passed on main', time: '18m', color: '#34d2c4' },
+    ],
+    health: [ { label: 'Steps', val: '6,840' }, { label: 'Rest HR', val: '54' }, { label: 'Sleep', val: '6h20' } ],
+    healthReminder: 'Wind-down at 10:00 · recovery walk 6:00pm',
+    markets: [
+      { sym: 'NZX 50', price: 12480.5, chg: 0.42 },
+      { sym: 'NZD/USD', price: 0.6128, chg: -0.18 },
+      { sym: 'ASX 200', price: 7894.2, chg: 0.31 },
+      { sym: 'BTC', price: 64210, chg: -0.86 },
+    ],
+    news: [
+      { tag: 'NZ', head: 'RBNZ signals steady path on official cash rate', time: '12m' },
+      { tag: 'TECH', head: 'SaaS multiples firm as software spend rebounds', time: '34m' },
+    ],
+    olune: { mrr: '$4.8k', trials: 38, sites: 21, inv: '$7.2k', signups: 6, releaseDays: 8, sync: 0, ci: 'passing' },
+    nova: { enrol: 184, classes: 7, trials: 5, rev: '$26.4k', sync: 0 },
+    infra: { uptime: '99.98%', p95: 42, deploys: 2, rpm: 1280 },
+    finance: { cash: '$128k', burn: '$14k', runway: '19mo', net: '+$9.2k', spark: [22,26,21,30,27,34,29,38,33,42,37,45] },
+    channels: [ { tag: 'WA', color: '#25d366' }, { tag: 'M', color: '#0a84ff' }, { tag: 'IG', color: '#ff5fa8' }, { tag: 'SL', color: '#e8b21f' }, { tag: 'GM', color: '#ea4d3d' } ],
+    messages: [
+      { tag: 'WA', from: 'Mum', text: 'Sunday lunch still on?', time: '3m', color: '#25d366' },
+      { tag: 'IG', from: '@novadance', text: 'New enrolment enquiry', time: '11m', color: '#ff5fa8' },
+      { tag: 'SL', from: 'Olune #deploys', text: 'main → prod passed', time: '18m', color: '#e8b21f' },
+      { tag: 'GM', from: 'R. Whitley', text: 'Re: Vaganova spots', time: '40m', color: '#ea4d3d' },
+    ],
+  };
+
+  emailPool = [
+    { sender: 'Apple', subject: 'Your receipt from the App Store', k: 'acc' },
+    { sender: 'Olune · Support', subject: 'Trial user asked about live sites', k: 'acc' },
+    { sender: 'NZX Markets', subject: 'Daily close summary attached', k: 'acc' },
+    { sender: 'Nova Parent', subject: 'Costume sizing for the recital', k: 'acc' },
+    { sender: 'Vercel', subject: 'Deployment to olune-prod succeeded', k: 'ok' },
+  ];
+  newsPool = [
+    { tag: 'ARTS', head: 'Christchurch performing-arts funding round opens', time: '1m' },
+    { tag: 'BIZ', head: 'Small-studio software adoption hits record in Q2', time: '1m' },
+    { tag: 'NZ', head: 'Auckland housing activity edges up in Q2', time: '1m' },
+    { tag: 'TECH', head: 'Edge compute pricing falls across major hosts', time: '1m' },
+  ];
+
+  agents = [
+    { id: 'orion',    name: 'ORION',    role: 'Infra · DevOps', color: '#34d2c4', status: 'Vercel · edge p95 42ms · 99.98% up' },
+    { id: 'sable',    name: 'SABLE',    role: 'Business Finance', color: '#46d27e', status: 'Reconciling Stripe · runway 19mo' },
+    { id: 'vesper',   name: 'VESPER',   role: 'Personal · Health', color: '#b07cff', status: 'Sleep debt 40m · nudge queued' },
+    { id: 'morrigan', name: 'MORRIGAN', role: 'Growth · Ads', color: '#ff5fa8', status: 'ROAS 3.8x · scaling winners' },
+    { id: 'theron',   name: 'THERON',   role: 'Research · Intel', color: '#ffc24d', status: 'Scanning 42 sources · brief ready' },
+    { id: 'cypher',   name: 'CYPHER',   role: 'CEO · Orchestrator', color: '#6aa8ff', status: 'Coordinating 5 agents · all green' },
+  ];
+
+  scripts = [
+    { ag: 5, ask: 'Cypher, give me the morning brief.', ans: "Good morning. Both companies are healthy, infrastructure is green, and your calendar holds three blocks. You're carrying a little sleep debt — I've put the agents on everything else. Shall I run the day?" },
+    { ag: 0, ask: "Orion, how's our infrastructure?", ans: 'olune-prod is green — 99.98% uptime, edge p95 at forty-two milliseconds. Vercel shipped two deploys overnight, both passing. I scaled up two instances ahead of the morning traffic.' },
+    { ag: 1, ask: 'Sable, where do the business finances sit?', ans: "Olune MRR is up twelve percent to $4.8k with thirty-eight trials live; Nova's term revenue is $26.4k. Two invoices slipped overdue — reminders are queued. Combined runway is nineteen months." },
+    { ag: 2, ask: 'Vesper, how am I doing personally?', ans: "Sixty-eight hundred steps, resting heart rate fifty-four, but forty minutes short on sleep. I've set a wind-down nudge for ten and booked a recovery walk at six. Drink some water." },
+    { ag: 3, ask: 'Morrigan, how are the campaigns performing?', ans: 'Return on ad spend is three point eight x. The Nova trial campaign is up fourteen percent, so I moved budget to the winners and drafted three new ad variants for your sign-off.' },
+    { ag: 4, ask: 'Theron, anything I should know today?', ans: "I scanned forty-two sources. The Reserve Bank signalled a steady cash rate, SaaS multiples firmed, and a competitor cut pricing — there's a one-page brief in your inbox." },
+  ];
+
+  // ---- refs ----
+  setStage = (el) => { this.stage = el; };
+  setStageInner = (el) => { this.inner = el; if (el) this.scaleStage(); };
+  setCoreCanvas = (el) => { this.coreCanvas = el; if (el && !this._inited) this.initCore(); };
+  setWaveCanvas = (el) => { this.waveCanvas = el; };
+
+  // ================= CORE =================
+  initCore() {
+    const c = this.coreCanvas;
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.4);
+    const size = 1180;
+    c.width = size * dpr; c.height = size * dpr;
+    const ctx = c.getContext('2d'); ctx.scale(dpr, dpr);
+    this.ctx = ctx; this.size = size; this.cx = size / 2; this.cy = size / 2; this.maxR = 468;
+    this.buildGeometry();
+    this.curPal = this.palFromColor(this.agents[this.state.agentIdx].color);
+    this.palTarget = this.palFromColor(this.agents[this.state.agentIdx].color);
+    this.viz = { exp: .68, expT: .68, rot: 0, rotS: .03, rotST: .03, bri: .55, briT: .55,
+                 lvl: .07, geo: 0, geoT: 0, wave: 0, waveT: 0, resp: 0, respT: 0, ripple: 0, breathe: 0 };
+    this.waves = []; this.waveTimer = 0; this.pulse = 0;
+    this.synapses = []; this.synTimer = 0;
+    this.lastT = performance.now();
+    this._inited = true;
+    this.linksOn = this.state.linksOn; this.hoverNode = -1; this.mouse = null;
+    this._onMove = (e) => { const r = c.getBoundingClientRect(); this.mouse = { x: (e.clientX - r.left) / r.width * this.size, y: (e.clientY - r.top) / r.height * this.size }; };
+    this._onLeave = () => { this.mouse = null; this.hoverNode = -1; };
+    c.addEventListener('mousemove', this._onMove); c.addEventListener('mouseleave', this._onLeave);
+    if (!this._raf) this._raf = requestAnimationFrame(this.loop);
+  }
+
+  hexRgb(h) { h = h.replace('#', ''); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+  mix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+  palFromColor(hex) {
+    const c = this.hexRgb(hex), W = [255, 255, 255], B = [0, 0, 0];
+    return { deep: this.mix(c, B, 0.35), mid: c.slice(), hot: this.mix(c, W, 0.5), white: this.mix(c, W, 0.82) };
+  }
+
+  buildGeometry() {
+    const d = this.props.particleDensity ?? 1, R = this.maxR;
+    const spokeN = Math.round(150 * d);
+    this.spokes = [];
+    for (let i = 0; i < spokeN; i++) {
+      const a = Math.random() * 6.28, inner = 5 + Math.random() * 26, outer = R * (0.5 + Math.random() * 0.52);
+      const segs = 6 + Math.floor(Math.random() * 8), pts = []; let wob = 0;
+      for (let s = 0; s <= segs; s++) { const t = s / segs; wob += (Math.random() - 0.5) * 0.07; pts.push({ r: inner + (outer - inner) * t, da: wob * (0.35 + t), j: Math.random() * 6.28, jf: 0.5 + Math.random() }); }
+      this.spokes.push({ a, pts, speed: 0.5 + Math.random(), bri: 0.35 + Math.random() * 0.6 });
+    }
+    const nodeN = Math.round(620 * d);
+    this.nodes = [];
+    for (let i = 0; i < nodeN; i++) { const rr = Math.pow(Math.random(), 0.85); this.nodes.push({ a: Math.random() * 6.28, r: 6 + rr * R * 0.97, sz: 0.5 + Math.random() * 1.9, ph: Math.random() * 6.28, sp: 0.5 + Math.random() * 2.2, bri: 0.3 + Math.random() * 0.7 }); }
+    const coreN = Math.round(170 * d);
+    for (let i = 0; i < coreN; i++) { const rr = Math.pow(Math.random(), 1.7); this.nodes.push({ a: Math.random() * 6.28, r: 3 + rr * 80, sz: 0.6 + Math.random() * 1.5, ph: Math.random() * 6.28, sp: 0.7 + Math.random() * 2.5, bri: 0.45 + Math.random() * 0.55 }); }
+    this.links = [];
+    for (let i = 0; i < this.nodes.length; i += 2) this.links.push([i, (i + 1 + Math.floor(Math.random() * 6)) % this.nodes.length]);
+    for (const nd of this.nodes) { nd.bx = Math.cos(nd.a) * nd.r; nd.by = Math.sin(nd.a) * nd.r; }
+    this.neighbors = this.nodes.map((nd, i) => { const ds = []; for (let j = 0; j < this.nodes.length; j++) { if (j === i) continue; const dx = this.nodes[j].bx - nd.bx, dy = this.nodes[j].by - nd.by; ds.push([dx * dx + dy * dy, j]); } ds.sort((a, b) => a[0] - b[0]); return ds.slice(0, 4).map(d => d[1]); });
+    this.arcs = [];
+    for (let i = 0; i < 3; i++) this.arcs.push({ r: R * (0.46 + i * 0.2), start: Math.random() * 6.28, len: 0.6 + Math.random() * 1.5, sp: (Math.random() - 0.5) * 0.3 - 0.08, w: 1 + Math.random() * 2.2 });
+    this.knot = [];
+    for (let i = 0; i < 8; i++) this.knot.push({ r: 16 + Math.random() * 40, sp: 0.4 + Math.random() * 1.3, e: 0.3 + Math.random() * 0.7, ph: Math.random() * 6.28 });
+    this.lobes = [];
+    for (let i = 0; i < 6; i++) this.lobes.push({ a: i / 6 * 6.283 + Math.random() * 0.5, r: R * (0.26 + Math.random() * 0.4), size: R * (0.18 + Math.random() * 0.14), ph: Math.random() * 6.28, sp: 0.45 + Math.random() * 0.85, orb: (Math.random() - 0.5) * 0.22 });
+  }
+
+  col(t, a) {
+    const p = this.curPal, c = [0, 0, 0];
+    if (t < 0.5) { const k = t / 0.5; for (let i = 0; i < 3; i++) c[i] = p.deep[i] + (p.mid[i] - p.deep[i]) * k; }
+    else { const k = (t - 0.5) / 0.5; for (let i = 0; i < 3; i++) c[i] = p.mid[i] + (p.white[i] - p.mid[i]) * k; }
+    return `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+  }
+  rippleAt(r) { if (this.viz.ripple < 0.002) return 0; return Math.sin(r * 0.05 - this.viz.breathe * 7) * this.viz.ripple * 15 * (r / this.maxR); }
+
+  loop = () => {
+    this._raf = requestAnimationFrame(this.loop);
+    const now = performance.now(); let dt = (now - this.lastT) / 1000; this.lastT = now; if (dt > 0.05) dt = 0.05;
+    this.tickViz(dt); this.drawCore(dt); this.drawWave(dt);
+  };
+
+  tickViz(dt) {
+    const v = this.viz, ms = this.props.motionSpeed ?? 1;
+    const e = (cur, tgt, sp) => cur + (tgt - cur) * Math.min(1, sp * dt);
+    v.exp = e(v.exp, v.expT, 2.6); v.rotS = e(v.rotS, v.rotST * ms, 3); v.bri = e(v.bri, v.briT, 3);
+    v.geo = e(v.geo, v.geoT, 2.5); v.wave = e(v.wave, v.waveT, 3); v.resp = e(v.resp, v.respT, 3);
+    v.ripple = Math.max(0, v.ripple - dt * 1.1); v.breathe += dt * ms;
+    if (this.palTarget) { const f = Math.min(1, 2.2 * dt); for (const key of ['deep', 'mid', 'hot', 'white']) { const c = this.curPal[key], tg = this.palTarget[key]; for (let i = 0; i < 3; i++) c[i] += (tg[i] - c[i]) * f; } }
+    const t = v.breathe, m = this.state.mode;
+    let tl = 0.06;
+    if (m === 'listening') tl = 0.13 + 0.13 * Math.abs(Math.sin(t * 5) + 0.5 * Math.sin(t * 11));
+    else if (m === 'responding') tl = 0.17 + 0.17 * Math.abs(Math.sin(t * 9)) + this.pulse * 0.25;
+    else if (m === 'thinking') tl = 0.15;
+    v.lvl = e(v.lvl, tl, 5); this.pulse = Math.max(0, this.pulse - dt * 3);
+  }
+
+  drawCore(dt) {
+    const ctx = this.ctx; if (!ctx) return;
+    const { cx, cy, maxR, viz } = this;
+    viz.rot += viz.rotS * dt;
+    const bp = viz.breathe * 0.6, raw = Math.sin(bp) * 0.5 + 0.5, breath = raw * raw * (3 - 2 * raw);
+    const breathe = 1 + breath * 0.055, exp = viz.exp * breathe, bri = viz.bri * (0.82 + breath * 0.22), lvl = viz.lvl;
+    const t = viz.breathe;
+
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = 'rgba(5,5,8,0.20)'; ctx.fillRect(0, 0, this.size, this.size);
+    ctx.globalCompositeOperation = 'lighter';
+
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR * exp * 1.15);
+    g.addColorStop(0, this.col(0.7, 0.20 * bri)); g.addColorStop(0.4, this.col(0.3, 0.075 * bri)); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, maxR * exp * 1.15, 0, 7); ctx.fill();
+
+    ctx.lineWidth = 0.5;
+    for (const [i, j] of this.links) {
+      const a = this.nodes[i], b = this.nodes[j];
+      const aa = a.a + viz.rot * (0.6 + a.r / maxR * 0.8), ar = a.r * exp + this.rippleAt(a.r);
+      const ba = b.a + viz.rot * (0.6 + b.r / maxR * 0.8), br = b.r * exp + this.rippleAt(b.r);
+      const ax = cx + Math.cos(aa) * ar, ay = cy + Math.sin(aa) * ar, bx = cx + Math.cos(ba) * br, by = cy + Math.sin(ba) * br;
+      if (Math.abs(ax - bx) + Math.abs(ay - by) > 130) continue;
+      ctx.strokeStyle = this.col(0.2, 0.045 * bri); ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+    }
+
+    ctx.lineWidth = 0.85;
+    for (const sp of this.spokes) {
+      ctx.beginPath(); let first = true;
+      for (const p of sp.pts) {
+        const jit = Math.sin(t * sp.speed * 1.3 + p.j) * 0.02 * p.jf, ang = sp.a + viz.rot * sp.speed + p.da + jit, r = p.r * exp + this.rippleAt(p.r);
+        const x = cx + Math.cos(ang) * r, y = cy + Math.sin(ang) * r;
+        if (first) { ctx.moveTo(x, y); first = false; } else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = this.col(0.25 + sp.bri * 0.4, 0.05 + sp.bri * 0.15 * bri); ctx.stroke();
+    }
+
+    for (const ar of this.arcs) { ar.start += ar.sp * dt; ctx.lineWidth = ar.w; ctx.strokeStyle = this.col(0.32, 0.10 * bri); ctx.beginPath(); ctx.arc(cx, cy, ar.r * exp, ar.start, ar.start + ar.len); ctx.stroke(); }
+
+    for (const n of this.nodes) {
+      const ang = n.a + viz.rot * (0.6 + n.r / maxR * 0.8), r = n.r * exp + this.rippleAt(n.r);
+      const x = cx + Math.cos(ang) * r, y = cy + Math.sin(ang) * r, fl = 0.5 + 0.5 * Math.sin(t * n.sp + n.ph);
+      n._x = x; n._y = y;
+      ctx.fillStyle = this.col(0.4 + fl * 0.5, (0.13 + n.bri * 0.6 * fl) * bri); ctx.beginPath(); ctx.arc(x, y, n.sz * (0.7 + fl * 0.6) + lvl * 1.6, 0, 7); ctx.fill();
+    }
+
+    for (const k of this.knot) {
+      const ang = k.ph + viz.rot * 2 * k.sp + Math.sin(t * k.sp) * 0.4, rr = k.r * exp * (0.76 + 0.2 * Math.sin(t * k.sp + k.ph) + breath * 0.2);
+      ctx.lineWidth = 1.1; ctx.strokeStyle = this.col(0.7, 0.11 * bri); ctx.beginPath(); ctx.ellipse(cx, cy, rr, rr * k.e, ang, 0, 7); ctx.stroke();
+    }
+
+    const innerR = (155 + breath * 40) * exp;
+    const ig = ctx.createRadialGradient(cx, cy, 0, cx, cy, innerR);
+    ig.addColorStop(0, this.col(0.55, 0.10 * bri)); ig.addColorStop(0.55, this.col(0.4, 0.05 * bri)); ig.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = ig; ctx.beginPath(); ctx.arc(cx, cy, innerR, 0, 7); ctx.fill();
+    const hr = (32 + breath * 28 + lvl * 70) * exp;
+    const hot = ctx.createRadialGradient(cx, cy, 0, cx, cy, hr);
+    hot.addColorStop(0, this.col(1, (0.4 + breath * 0.3) * bri)); hot.addColorStop(0.32, this.col(0.9, 0.2 * bri)); hot.addColorStop(0.68, this.col(0.75, 0.07 * bri)); hot.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = hot; ctx.beginPath(); ctx.arc(cx, cy, hr, 0, 7); ctx.fill();
+
+    const act = 0.5 + viz.geo * 0.85;
+    for (const lo of this.lobes) {
+      const pulse = 0.35 + 0.65 * (Math.sin(t * lo.sp + lo.ph) * 0.5 + 0.5), ang = lo.a + viz.rot * lo.orb;
+      const lx = cx + Math.cos(ang) * lo.r * exp, ly = cy + Math.sin(ang) * lo.r * exp, sz = lo.size * exp * (0.8 + pulse * 0.4 + breath * 0.15);
+      const lg = ctx.createRadialGradient(lx, ly, 0, lx, ly, sz);
+      lg.addColorStop(0, this.col(0.7, 0.11 * bri * pulse * act)); lg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = lg; ctx.beginPath(); ctx.arc(lx, ly, sz, 0, 7); ctx.fill();
+    }
+
+    const fireRate = viz.geo > 0.5 ? 0.045 : (viz.resp > 0.5 ? 0.085 : 0.2);
+    this.synTimer -= dt;
+    if (this.synTimer <= 0) { this.synTimer = fireRate * (0.6 + Math.random() * 0.9); this.synapses.push({ sp: this.spokes[(Math.random() * this.spokes.length) | 0], t: 0, v: 0.7 + Math.random() * 0.8 }); }
+    for (let i = this.synapses.length - 1; i >= 0; i--) {
+      const s = this.synapses[i]; s.t += s.v * dt;
+      if (s.t >= 1) { this.synapses.splice(i, 1); continue; }
+      const pts = s.sp.pts, fp = s.t * (pts.length - 1), i0 = Math.min(pts.length - 1, fp | 0), i1 = Math.min(pts.length - 1, i0 + 1), fr = fp - i0;
+      const p = pts[i0], q = pts[i1], pr = p.r + (q.r - p.r) * fr, pda = p.da + (q.da - p.da) * fr, ang = s.sp.a + viz.rot * s.sp.speed + pda, r = pr * exp + this.rippleAt(pr);
+      const x = cx + Math.cos(ang) * r, y = cy + Math.sin(ang) * r, fade = Math.sin(s.t * Math.PI);
+      const sg = ctx.createRadialGradient(x, y, 0, x, y, 7); sg.addColorStop(0, this.col(1, 0.7 * fade * bri)); sg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(x, y, 7, 0, 7); ctx.fill();
+    }
+
+    if (viz.wave > 0.02) {
+      ctx.lineWidth = 1.5; ctx.strokeStyle = this.col(0.55, 0.32 * bri * viz.wave); ctx.beginPath();
+      const baseR = maxR * 0.45 * exp, N = 170;
+      for (let i = 0; i <= N; i++) { const ang = i / N * 6.283, w = Math.sin(ang * 12 + t * 4) * 6 + Math.sin(ang * 5 - t * 2) * 4, r = baseR + w * (0.4 + lvl * 2.2) * viz.wave, x = cx + Math.cos(ang + viz.rot) * r, y = cy + Math.sin(ang + viz.rot) * r; if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+      ctx.closePath(); ctx.stroke();
+    }
+
+    if (viz.resp > 0.02) { this.waveTimer -= dt; if (this.waveTimer <= 0) { this.waves.push({ r: 36, a: 0.45 }); this.waveTimer = 0.32 + Math.random() * 0.18; this.pulse = 1; } }
+    for (let i = this.waves.length - 1; i >= 0; i--) { const w = this.waves[i]; w.r += 230 * dt; w.a -= dt * 0.42; if (w.a <= 0) { this.waves.splice(i, 1); continue; } ctx.lineWidth = 2; ctx.strokeStyle = this.col(0.6, w.a * bri); ctx.beginPath(); ctx.arc(cx, cy, w.r * exp, 0, 7); ctx.stroke(); }
+
+    if (this.linksOn && this.mouse) {
+      let best = -1, bd = 1e9;
+      for (let i = 0; i < this.nodes.length; i++) { const nn = this.nodes[i]; if (nn._x == null) continue; const dx = nn._x - this.mouse.x, dy = nn._y - this.mouse.y, dd = dx * dx + dy * dy; if (dd < bd) { bd = dd; best = i; } }
+      this.hoverNode = (best >= 0 && bd < 900) ? best : -1;
+      if (this.hoverNode >= 0) {
+        const nn = this.nodes[this.hoverNode], nb = this.neighbors[this.hoverNode] || [];
+        ctx.lineWidth = 1.3;
+        for (const j of nb) { const o = this.nodes[j]; if (o._x == null) continue; ctx.strokeStyle = this.col(0.85, 0.85); ctx.beginPath(); ctx.moveTo(nn._x, nn._y); ctx.lineTo(o._x, o._y); ctx.stroke(); ctx.fillStyle = this.col(0.95, 0.95); ctx.beginPath(); ctx.arc(o._x, o._y, 2.6, 0, 7); ctx.fill(); }
+        ctx.fillStyle = this.col(1, 1); ctx.beginPath(); ctx.arc(nn._x, nn._y, 4, 0, 7); ctx.fill();
+        ctx.strokeStyle = this.col(0.9, 0.55); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(nn._x, nn._y, 10, 0, 7); ctx.stroke();
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = this.col(0.95, 0.92); ctx.font = "600 11px 'JetBrains Mono',monospace";
+        ctx.fillText(nb.length + ' synapses', nn._x + 14, nn._y - 10);
+      }
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  drawRings(ctx, cx, cy, exp, bri) {
+    const R = this.maxR, rot = this.viz.rot;
+    ctx.lineWidth = 1; ctx.strokeStyle = this.col(0.4, 0.12 * bri); ctx.beginPath(); ctx.arc(cx, cy, R * exp, 0, 7); ctx.stroke();
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < 64; i++) { const a = i / 64 * 6.283 + rot * 0.5, r1 = R * 0.92 * exp, r2 = R * (i % 8 === 0 ? 0.87 : 0.895) * exp; ctx.strokeStyle = this.col(0.4, (i % 8 === 0 ? 0.3 : 0.14) * bri); ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1); ctx.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2); ctx.stroke(); }
+    ctx.save(); ctx.setLineDash([4, 9]); ctx.lineWidth = 1.4; ctx.strokeStyle = this.col(0.45, 0.22 * bri); ctx.translate(cx, cy); ctx.rotate(rot * 1.3); ctx.beginPath(); ctx.arc(0, 0, R * 0.82 * exp, 0, 7); ctx.stroke(); ctx.restore();
+    ctx.lineWidth = 2.4;
+    for (let i = 0; i < 4; i++) { const s = -rot * 0.4 + i * 1.5708; ctx.strokeStyle = this.col(0.4, 0.2 * bri); ctx.beginPath(); ctx.arc(cx, cy, R * 1.06 * exp, s + 0.12, s + 1.45); ctx.stroke(); }
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(-rot * 0.9);
+    for (let i = 0; i < 90; i++) { const a = i / 90 * 6.283, r = R * 0.6 * exp; ctx.fillStyle = this.col(0.4, 0.12 * bri); ctx.beginPath(); ctx.arc(Math.cos(a) * r, Math.sin(a) * r, 0.9, 0, 7); ctx.fill(); }
+    ctx.restore();
+  }
+
+  drawWave(dt) {
+    const c = this.waveCanvas; if (!c) return;
+    if (!this._wd) { const dpr = Math.min(window.devicePixelRatio || 1, 2); c.width = 200 * dpr; c.height = 42 * dpr; c.getContext('2d').scale(dpr, dpr); this._wd = true; }
+    const ctx = c.getContext('2d'); ctx.clearRect(0, 0, 200, 42);
+    const N = 44, mid = 21, t = this.viz.breathe, lvl = this.viz.lvl;
+    for (let i = 0; i < N; i++) { const x = i * (200 / N) + 1.5, env = Math.sin((i / N) * Math.PI), h = 2 + env * (3 + (Math.abs(Math.sin(t * 6 + i * 0.7)) * 0.6 + Math.abs(Math.sin(t * 11 + i)) * 0.4) * (lvl * 130)); ctx.fillStyle = this.col(0.55, 0.35 + lvl * 1.4); ctx.fillRect(x, mid - h, 2.4, h * 2); }
+  }
+
+  // ================= STATE =================
+  refreshPalTarget() { this.palTarget = (this.state.mode === 'error') ? this.palFromColor('#ff4133') : this.palFromColor(this.agents[this.state.agentIdx].color); }
+  setMode(m) {
+    const v = this.viz; if (!v) return;
+    const TBL = { idle:{exp:.68,rot:.03,bri:.55,geo:0,wave:0,resp:0,grid:.04}, listening:{exp:.82,rot:.05,bri:.72,geo:0,wave:1,resp:0,grid:.10}, thinking:{exp:1.05,rot:.15,bri:.85,geo:1,wave:0,resp:0,grid:.16}, responding:{exp:.98,rot:.07,bri:1.0,geo:.25,wave:0,resp:1,grid:.13}, error:{exp:.9,rot:.04,bri:.7,geo:0,wave:.3,resp:0,grid:.08} };
+    const T = TBL[m] || TBL.idle;
+    v.expT = T.exp; v.rotST = T.rot; v.briT = T.bri; v.geoT = T.geo; v.waveT = T.wave; v.respT = T.resp;
+    if (m === 'error') v.ripple = 1;
+    if (this.stage) this.stage.style.setProperty('--grid', T.grid);
+    this.setState({ mode: m }, () => this.refreshPalTarget());
+  }
+  setAgent(i) { this.setState({ agentIdx: i }, () => this.refreshPalTarget()); }
+  manualMode(m) { this.manual = true; this.clearDemo(); if (m === 'listening') this.setDisp('YOU', 'Listening…'); else if (m === 'thinking') this.setDisp(this.agents[this.state.agentIdx].name, 'Reasoning…'); else if (m === 'error') this.setDisp('CYPHER', 'Signal degraded — recalibrating the core.'); this.setMode(m); }
+  manualAgent(i) {
+    this.manual = true; this.clearDemo(); this.setAgent(i); this.setMode('responding');
+    const ag = this.agents[i]; this.setDisp(ag.name, ag.status + '.'); this.logToObsidian(ag.name, ag.status);
+    this.t1 = setTimeout(() => this.setMode('idle'), 2600);
+  }
+  setDisp(speaker, text) { this.setState({ speaker, text }); }
+  toggleLinks = () => { this.linksOn = !this.state.linksOn; if (this.coreCanvas) this.coreCanvas.style.cursor = this.linksOn ? 'crosshair' : 'default'; if (!this.linksOn) this.hoverNode = -1; this.setState({ linksOn: this.linksOn }); };
+  logToObsidian = (speaker, text) => { const d = new Date(); const t = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); this.setState(s => ({ obsidianCount: s.obsidianCount + 1, obsidianLast: speaker + ' · ' + t })); };
+
+  clearDemo() { ['t1', 't2', 't3', 't4'].forEach(k => clearTimeout(this[k])); clearInterval(this.streamTimer); }
+  resumeDemo = () => { this.manual = false; this.runExchange(this.exIdx || 0); };
+  streamText(speaker, text, perChar, done) {
+    clearInterval(this.streamTimer); let n = 0; this.setDisp(speaker, '');
+    const cps = perChar / (this.props.motionSpeed ?? 1);
+    this.streamTimer = setInterval(() => { n++; this.setDisp(speaker, text.slice(0, n)); if (n >= text.length) { clearInterval(this.streamTimer); if (done) done(); } }, cps);
+  }
+  runExchange(i) {
+    if (this.manual) return;
+    this.exIdx = i; const ex = this.scripts[i % this.scripts.length];
+    this.setAgent(ex.ag); this.setMode('idle'); this.setDisp('YOU', '');
+    this.t1 = setTimeout(() => {
+      this.setMode('listening');
+      this.streamText('YOU', ex.ask, 34, () => {
+        this.t2 = setTimeout(() => {
+          this.setMode('thinking'); this.setDisp(this.agents[ex.ag].name, 'Working…');
+          this.t3 = setTimeout(() => {
+            this.setMode('responding');
+            this.streamText(this.agents[ex.ag].name, ex.ans, 22, () => { this.logToObsidian(this.agents[ex.ag].name, ex.ans); this.t4 = setTimeout(() => this.runExchange(i + 1), 3000); });
+          }, 1800);
+        }, 500);
+      });
+    }, 1900);
+  }
+
+  // ================= LIFECYCLE =================
+  componentDidMount() {
+    if (this.coreCanvas && !this._inited) this.initCore();
+    this.tick(); this.clockInt = setInterval(() => this.tick(), 1000);
+    this._resize = () => this.scaleStage(); window.addEventListener('resize', this._resize); this.scaleStage();
+    if (window.ResizeObserver) { this._ro = new ResizeObserver(() => this.scaleStage()); if (this.stage) this._ro.observe(this.stage); }
+    if (this.props.autoDemo !== false) this.runExchange(0); else this.setMode('idle');
+  }
+  componentDidUpdate(prev) { if (prev.particleDensity !== this.props.particleDensity && this._inited) this.buildGeometry(); }
+  componentWillUnmount() { cancelAnimationFrame(this._raf); clearInterval(this.clockInt); this.clearDemo(); window.removeEventListener('resize', this._resize); if (this._ro) this._ro.disconnect(); if (this.coreCanvas) { this.coreCanvas.removeEventListener('mousemove', this._onMove); this.coreCanvas.removeEventListener('mouseleave', this._onLeave); } }
+  scaleStage() {
+    if (!this.inner) return;
+    const w = window.innerWidth, h = window.innerHeight;
+    const s = Math.min(w / 1920, h / 1080);
+    if (!s || !isFinite(s)) { requestAnimationFrame(() => this.scaleStage()); return; }
+    this.inner.style.transform = `scale(${s})`;
+  }
+
+  tick() {
+    const d = new Date(), p = (n) => String(n).padStart(2, '0');
+    const time = `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+    const date = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }).toUpperCase();
+    const tn = this.state.tickN + 1;
+    const markets = this.state.markets.map(m => ({ ...m, price: m.price * (1 + (Math.random() - 0.5) * 0.0015), chg: Math.max(-3, Math.min(3, m.chg + (Math.random() - 0.5) * 0.05)) }));
+    const olune = { ...this.state.olune }; olune.sync = (olune.sync + 1) % 11; olune.rpm = olune.rpm; if (tn % 5 === 0 && Math.random() < 0.5) olune.signups += 1;
+    const nova = { ...this.state.nova }; nova.sync = (nova.sync + 1) % 9;
+    const infra = { ...this.state.infra, p95: 38 + Math.round(Math.random() * 9), rpm: 1180 + Math.round(Math.random() * 220) };
+    const finance = { ...this.state.finance }; const fs = finance.spark.slice(1); fs.push(20 + Math.random() * 28); finance.spark = fs;
+    let news = this.state.news;
+    if (tn % 6 === 0) { const cur = this.state.news[0].head; const pool = this.newsPool.filter(n => n.head !== cur); const pick = pool[(Math.random() * pool.length) | 0] || this.newsPool[0]; news = [{ ...pick, time: '1m' }, { ...this.state.news[0], time: '18m' }]; }
+    let emails = this.state.emails;
+    if (tn % 16 === 0) { const pick = this.emailPool[(Math.random() * this.emailPool.length) | 0]; emails = [{ ...pick, time: 'now', unread: true }, ...this.state.emails].slice(0, 5); }
+    this.setState({ time, date, latency: 8 + Math.floor(Math.random() * 9), tickN: tn, markets, olune, nova, infra, finance, news, emails });
+  }
+
+  // ================= RENDER =================
+  renderVals() {
+    const mode = this.state.mode, ai = this.state.agentIdx;
+    const dotMap = { ok: 'var(--ok)', bad: 'var(--bad)', acc: 'var(--acc)' };
+
+    const mk = (k, label) => {
+      const active = mode === k;
+      const style = `font:600 11px 'Rajdhani',sans-serif;letter-spacing:2px;padding:6px 14px;cursor:pointer;text-transform:uppercase;transition:all .5s ease;clip-path:polygon(0 5px,5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%);` + (active ? `border:1px solid var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc-hot);box-shadow:0 0 16px var(--glow),inset 0 0 12px color-mix(in srgb,var(--acc) 20%,transparent);` : `border:1px solid color-mix(in srgb,var(--acc) 16%,transparent);background:transparent;color:var(--dim);`);
+      return { k, label, style, onClick: () => this.manualMode(k) };
+    };
+    const modes = [mk('idle', 'Idle'), mk('listening', 'Listen'), mk('thinking', 'Think'), mk('responding', 'Respond'), mk('error', 'Alert')];
+    const autoStyle = `font:600 11px 'Rajdhani',sans-serif;letter-spacing:2px;padding:6px 12px;margin-left:6px;cursor:pointer;text-transform:uppercase;color:var(--dim);background:transparent;border:1px dashed color-mix(in srgb,var(--acc) 30%,transparent);clip-path:polygon(0 5px,5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%);`;
+
+    const statusMap = { idle: ['STANDBY', '#6aa8ff'], listening: ['LISTENING', this.agents[ai].color], thinking: ['PROCESSING', this.agents[ai].color], responding: ['RESPONDING', this.agents[ai].color], error: ['ALERT · RECALIBRATING', '#ff5a4d'] };
+    const [statusWord, statusColor] = statusMap[mode] || statusMap.idle;
+    const linksActive = this.state.linksOn;
+    const linksStyle = `font:600 11px 'Rajdhani',sans-serif;letter-spacing:2px;padding:6px 12px;margin-left:4px;cursor:pointer;text-transform:uppercase;clip-path:polygon(0 5px,5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%);` + (linksActive ? `border:1px solid var(--acc);color:var(--acc-hot);background:color-mix(in srgb,var(--acc) 14%,transparent);box-shadow:0 0 14px var(--glow);` : `border:1px solid color-mix(in srgb,var(--acc) 16%,transparent);color:var(--dim);background:transparent;`);
+    const linksLabel = linksActive ? '◇ LINKS ON' : '◇ LINKS';
+
+    const emails = this.state.emails.map(e => ({ ...e, dot: dotMap[e.k] || 'var(--acc)', op: e.unread ? 1 : 0.35 }));
+    const unread = this.state.emails.filter(e => e.unread).length;
+
+    const markets = this.state.markets.map(m => {
+      const up = m.chg >= 0;
+      const priceStr = m.price >= 1000 ? m.price.toLocaleString('en-US', { maximumFractionDigits: 1 }) : m.price.toFixed(m.price < 2 ? 4 : 2);
+      return { sym: m.sym, priceStr, chgStr: (up ? '+' : '') + m.chg.toFixed(2) + '%', color: up ? 'var(--ok)' : 'var(--bad)' };
+    });
+
+    const o = this.state.olune;
+    const oluneCells = [
+      { label: 'MRR', val: o.mrr, delta: '+12%', dColor: 'var(--ok)' },
+      { label: 'Trials', val: String(o.trials), delta: '+5', dColor: 'var(--ok)' },
+      { label: 'Sites Live', val: String(o.sites), delta: '+2', dColor: 'var(--ok)' },
+      { label: 'Open Inv', val: o.inv, delta: '2 due', dColor: 'var(--bad)' },
+      { label: 'Signups', val: String(o.signups), delta: 'today', dColor: 'var(--acc)' },
+      { label: 'Release', val: o.releaseDays + 'd', dColor: 'var(--dim)', delta: 'Jul' },
+    ];
+    const oluneSync = 'SYNCED ' + o.sync + 's';
+
+    const n = this.state.nova;
+    const novaCells = [ { label: 'Enrolled', val: String(n.enrol) }, { label: 'Classes', val: String(n.classes) }, { label: 'Trials', val: String(n.trials) }, { label: 'Term Rev', val: n.rev } ];
+    const novaClasses = [ { time: '15:30', name: 'Juniors · RAD G3' }, { time: '16:45', name: 'Seniors · Vaganova' } ];
+    const novaEvents = [ { date: 'JUL 18', name: 'Launch Party' }, { date: 'AUG 2', name: 'Vaganova Class' } ];
+    const novaSync = 'SYNCED ' + n.sync + 's';
+
+    const inf = this.state.infra;
+    const infraCells = [ { label: 'Uptime', val: inf.uptime }, { label: 'Edge p95', val: inf.p95 + 'ms' }, { label: 'Deploys', val: String(inf.deploys) }, { label: 'Req/min', val: inf.rpm.toLocaleString('en-US') } ];
+
+    const f = this.state.finance;
+    const financeCells = [ { label: 'Cash', val: f.cash }, { label: 'Burn / mo', val: f.burn }, { label: 'Runway', val: f.runway }, { label: 'Net 30d', val: f.net } ];
+    const fsp = f.spark, mn = Math.min(...fsp), mx = Math.max(...fsp);
+    const financeSpark = fsp.map((y, i) => `${(i / (fsp.length - 1) * 96).toFixed(1)},${(42 - ((y - mn) / (mx - mn || 1) * 38)).toFixed(1)}`).join(' ');
+
+    const agents = this.agents.map((a, i) => {
+      const active = i === ai;
+      const style = `text-align:left;cursor:pointer;width:160px;padding:8px 11px;transition:all .5s ease;clip-path:polygon(0 7px,7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%);border-top:2px solid ${a.color};` + (active ? `border:1px solid ${a.color};border-top:2px solid ${a.color};background:color-mix(in srgb,${a.color} 14%,#000);box-shadow:0 0 22px color-mix(in srgb,${a.color} 55%,transparent),inset 0 0 18px color-mix(in srgb,${a.color} 16%,transparent);` : `border:1px solid color-mix(in srgb,${a.color} 18%,transparent);border-top:2px solid color-mix(in srgb,${a.color} 55%,transparent);background:linear-gradient(160deg,color-mix(in srgb,${a.color} 6%,#000),rgba(0,0,0,.2));`);
+      return { name: a.name, role: a.role, color: a.color, status: a.status, style, nameColor: active ? '#fff' : 'var(--txt)', dotOp: active ? 1 : 0.4, onClick: () => this.manualAgent(i) };
+    });
+
+    return {
+      setStage: this.setStage, setStageInner: this.setStageInner, setCoreCanvas: this.setCoreCanvas, setWaveCanvas: this.setWaveCanvas,
+      time: this.state.time, date: this.state.date, latency: this.state.latency,
+      modes, autoStyle, resumeAuto: this.resumeDemo, toggleLinks: this.toggleLinks, linksStyle, linksLabel, statusWord, statusColor,
+      obsidianCount: this.state.obsidianCount, obsidianLast: this.state.obsidianLast,
+      channels: this.state.channels, messages: this.state.messages, msgNew: this.state.messages.length,
+      speaker: this.state.speaker, text: this.state.text,
+      emails, unread, notifs: this.state.notifs, health: this.state.health, healthReminder: this.state.healthReminder,
+      markets, news: this.state.news,
+      oluneCells, oluneSync, oluneCI: o.ci, novaCells, novaClasses, novaEvents, novaSync, infraCells, financeCells, financeSpark,
+      agents,
+    };
+  }
+}
+</script>
+</body>
+</html>

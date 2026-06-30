@@ -1,28 +1,28 @@
 {
   "version": "1.0.0",
-  "default_agent_id": "jarvis-claude",
+  "default_agent_id": "jarvis-groq-llama-70b",
   "routes": [
     {
       "intent": "orchestrate",
-      "agent_id": "jarvis-claude",
-      "fallback_agent_id": "jarvis-openai",
+      "agent_id": "jarvis-groq-llama-70b",
+      "fallback_agent_id": "jarvis-groq-llama-8b",
       "description": "Planning, delegation, multi-step reasoning"
     },
     {
       "intent": "execute",
-      "agent_id": "jarvis-openai",
-      "fallback_agent_id": "jarvis-claude",
+      "agent_id": "jarvis-groq-llama-8b",
+      "fallback_agent_id": "jarvis-groq-llama-70b",
       "description": "Tool calls, structured output, API actions"
     },
     {
       "intent": "research",
       "agent_id": "jarvis-gemini",
-      "fallback_agent_id": "jarvis-claude",
+      "fallback_agent_id": "jarvis-groq-llama-70b",
       "description": "Long-context research and synthesis"
     },
     {
       "intent": "review",
-      "agent_id": "jarvis-claude",
+      "agent_id": "jarvis-groq-llama-70b",
       "description": "Code and output review"
     }
   ],

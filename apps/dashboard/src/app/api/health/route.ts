@@ -1,60 +1,44 @@
 import { NextResponse } from "next/server";
-import {
-  buildAgentRunDetails,
-  detectIntentFromText,
-  loadAgents,
-  loadIntegrations,
-  loadSystemConfig,
-  resolveIntent,
-  resolveRouteForIntent,
-} from "@jarvis/config";
+import { loadSystemConfig, resolveIntent, resolveRouteForIntent } from "@jarvis/config";
 
 export async function GET() {
-  return NextResponse.json({
-    status: "ok",
-    system: loadSystemConfig(),
-    agents: loadAgents().map((a) => ({
-      id: a.id,
-      supabase_id: a.supabase_id,
-      name: a.name,
-      status: a.status,
-      prompt_version: a.prompt_version,
-    })),
-    integrations: loadIntegrations().map((i) => ({
-      id: i.id,
-      name: i.name,
-      status: i.status,
-    })),
-  });
+  try {
+    const config = loadSystemConfig();
+    return NextResponse.json({
+      status: "ok",
+      system: config.name,
+      version: config.version,
+      default_agent: config.default_agent_id,
+    });
+  } catch (error: any) {
+    return NextResponse.json({ status: "error", error: error.message }, { status: 500 });
+  }
 }
 
-export async function POST(request: Request) {
-  const body = await request.json().catch(() => ({}));
-  const text = typeof body.text === "string" ? body.text : "";
-  const explicitIntent = typeof body.intent === "string" ? body.intent : undefined;
-  const sourceDefault =
-    typeof body.source_default === "string" ? body.source_default : undefined;
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const { text, intent, source_default } = body;
 
-  const intent = resolveIntent(text, { explicit: explicitIntent, sourceDefault });
-  const route = resolveRouteForIntent(intent);
-  const keywordMatch = text ? detectIntentFromText(text) : null;
+    if (!text && !intent) {
+      return NextResponse.json(
+        { error: "Missing required fields: 'text' or 'intent' must be provided." },
+        { status: 400 }
+      );
+    }
 
-  return NextResponse.json({
-    intent,
-    intent_source: explicitIntent
-      ? "explicit"
-      : keywordMatch
-        ? "keyword"
-        : sourceDefault
-          ? "source_default"
-          : "global_default",
-    keyword_match: keywordMatch,
-    agent_id: route.agent_id,
-    fallback_agent_id: route.fallback_agent_id,
-    responsible: route.responsible,
-    agent_run_details_preview: JSON.parse(
-      buildAgentRunDetails(route.agent_id, intent, { attempt: 1 }),
-    ),
-    message: "Task routing preview — wire to n8n webhook for full dispatch",
-  });
+    const resolvedIntent = resolveIntent(text || "", {
+      explicit: intent,
+      sourceDefault: source_default,
+    });
+    const route = resolveRouteForIntent(resolvedIntent);
+
+    return NextResponse.json({
+      status: "ok",
+      input: { text, intent, source_default },
+      resolution: route,
+    });
+  } catch (error: any) {
+    return NextResponse.json({ status: "error", error: error.message }, { status: 500 });
+  }
 }

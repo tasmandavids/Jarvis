@@ -1,0 +1,25 @@
+{
+  "id": "instagram",
+  "name": "Instagram DMs",
+  "status": "pending",
+  "owner_agent": "cypher",
+  "auth": {
+    "type": "oauth2",
+    "scopes": [
+      "instagram_manage_messages",
+      "pages_messaging"
+    ],
+    "env_key": "META_ACCESS_TOKEN"
+  },
+  "webhooks": {
+    "endpoint": "/api/webhooks/meta",
+    "env_key": "META_WEBHOOK_SECRET"
+  },
+  "actions": [
+    "read_messages",
+    "send_message"
+  ],
+  "approval_required": [
+    "send_message"
+  ]
+}

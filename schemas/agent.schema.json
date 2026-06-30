@@ -20,7 +20,7 @@
     "name": { "type": "string" },
     "provider": {
       "type": "string",
-      "enum": ["anthropic", "openai", "google"]
+      "enum": ["anthropic", "openai", "google", "groq"]
     },
     "model": { "type": "string" },
     "role": {

@@ -1,0 +1,83 @@
+{
+  "name": "Agent Dispatch (The Engine)",
+  "nodes": [
+    {
+      "parameters": {
+        "event": "insert",
+        "schema": "public",
+        "table": "tasks",
+        "options": {}
+      },
+      "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      "name": "Supabase Trigger (New Task)",
+      "type": "n8n-nodes-base.postgresTrigger",
+      "typeVersion": 1,
+      "position": [ 180, 240 ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"model\": \"llama3-70b-8192\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are Jarvis.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"={{ $json['headline'] }}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+      "name": "Call LLM (Groq)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [ 400, 240 ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "agent_runs",
+        "columns": "task_id, status, details",
+        "options": {}
+      },
+      "id": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
+      "name": "Log Agent Run (Supabase)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [ 620, 240 ]
+    }
+  ],
+  "connections": {
+    "Supabase Trigger (New Task)": {
+      "main": [
+        [
+          {
+            "node": "Call LLM (Groq)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call LLM (Groq)": {
+      "main": [
+        [
+          {
+            "node": "Log Agent Run (Supabase)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "meta": {
+    "description": "Listens for new tasks, calls Groq LLM, and writes output to agent_runs."
+  }
+}

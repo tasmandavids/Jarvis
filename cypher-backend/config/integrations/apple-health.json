@@ -1,0 +1,23 @@
+{
+  "id": "apple-health",
+  "name": "Apple Health",
+  "status": "pending",
+  "owner_agent": "vesper",
+  "auth": {
+    "type": "companion_app",
+    "note": "Requires iOS companion app with HealthKit entitlement. Posts to /api/health-sync on a schedule."
+  },
+  "metrics": [
+    "steps",
+    "resting_heart_rate",
+    "sleep_analysis",
+    "active_energy",
+    "mindful_minutes"
+  ],
+  "actions": [
+    "read_metrics"
+  ],
+  "approval_required": [],
+  "endpoint": "/api/health-sync",
+  "env_key": "HEALTH_SYNC_SECRET"
+}

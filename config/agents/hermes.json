@@ -1,0 +1,37 @@
+{
+  "$schema": "../../schemas/agent.schema.json",
+  "id": "hermes",
+  "name": "Hermes",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-20250514",
+  "role": "memory-comms",
+  "status": "active",
+  "color": "#f5c842",
+  "description": "Memory keeper & communications agent — writes to Obsidian, retrieves past context, handles outbound comms",
+  "capabilities": [
+    "memory-retrieval",
+    "memory-write",
+    "obsidian-sync",
+    "email",
+    "slack",
+    "whatsapp",
+    "knowledge-consolidation"
+  ],
+  "tools": [
+    "supabase",
+    "obsidian",
+    "gmail",
+    "slack",
+    "whatsapp"
+  ],
+  "system_prompt_ref": "prompts/hermes.md",
+  "prompt_version": "1.0.0",
+  "config": {
+    "max_tokens": 4096,
+    "temperature": 0.3
+  },
+  "metadata": {
+    "obsidian_root": "CYPHER",
+    "consolidation_schedule": "0 23 * * *"
+  }
+}

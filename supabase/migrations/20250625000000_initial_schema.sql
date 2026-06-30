@@ -29,50 +29,37 @@ create table public.tasks (
 
 -- ─── Memory (vector store, keyed to client) ──────────────────────────────────
 create table public.memory (
-  id uuid primary key,
+  id uuid primary key default gen_random_uuid(),
+  client_id uuid not null,
   created_at timestamptz not null default now(),
   note text,
   vector vector,
-  constraint memory_id_fkey foreign key (id) references public.clients (id)
+  constraint memory_client_id_fkey foreign key (client_id) references public.clients (id)
 );
 
 -- ─── Agent runs ──────────────────────────────────────────────────────────────
 create table public.agent_runs (
-  id uuid not null,
+  id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
-  agent_id uuid not null,
+  agent_id text not null,
   task_id uuid not null,
   status text,
   details text,
-  constraint agent_runs_pkey primary key (id, agent_id, task_id),
-  constraint agent_runs_agent_id_key unique (agent_id),
-  constraint agent_runs_task_id_key unique (task_id),
-  constraint agent_runs_id_fkey foreign key (id) references public.clients (id),
-  constraint agent_runs_id_fkey1 foreign key (id) references public.memory (id),
-  constraint agent_runs_id_fkey2 foreign key (id) references public.tasks (id)
+  constraint agent_runs_task_id_fkey foreign key (task_id) references public.tasks (id)
 );
 
 -- ─── Communications log ──────────────────────────────────────────────────────
 create table public.comms_log (
-  id uuid not null,
+  id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
-  agent_id uuid not null,
+  agent_run_id uuid,
   task_id uuid not null,
-  client uuid,
+  client_id uuid,
   message text,
   status text,
-  constraint comms_log_pkey primary key (id, agent_id, task_id),
-  constraint comms_log_agent_id_key unique (agent_id),
-  constraint comms_log_task_id_key unique (task_id),
-  constraint comms_log_id_fkey foreign key (id) references public.clients (id),
-  constraint comms_log_id_fkey1 foreign key (id) references public.memory (id),
-  constraint comms_log_id_fkey2 foreign key (id) references public.tasks (id),
-  constraint comms_log_id_agent_id_task_id_fkey
-    foreign key (id, agent_id, task_id)
-    references public.agent_runs (id, agent_id, task_id),
-  constraint comms_log_id_agent_id_task_id_fkey1
-    foreign key (id, agent_id, task_id)
-    references public.comms_log (id, agent_id, task_id)
+  constraint comms_log_task_id_fkey foreign key (task_id) references public.tasks (id),
+  constraint comms_log_agent_run_id_fkey foreign key (agent_run_id) references public.agent_runs (id),
+  constraint comms_log_client_id_fkey foreign key (client_id) references public.clients (id)
 );
 
 comment on table public.comms_log is 'communications';

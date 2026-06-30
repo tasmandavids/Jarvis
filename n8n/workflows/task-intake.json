@@ -1,8 +1,47 @@
 {
-  "name": "Task Intake (stub)",
-  "nodes": [],
-  "connections": {},
+  "name": "Task Intake",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "task-intake",
+        "options": {}
+      },
+      "id": "e4b6c31f-6a7c-48c9-8c11-9a3c1f2b4e5d",
+      "name": "Webhook Intake",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [ 200, 300 ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "schema": "public",
+        "table": "tasks",
+        "columns": "headline, description, status",
+        "options": {}
+      },
+      "id": "f5c7d420-7b8d-49d0-9d22-0b4d2e3c5f6e",
+      "name": "Insert into Supabase (Tasks)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [ 420, 300 ]
+    }
+  ],
+  "connections": {
+    "Webhook Intake": {
+      "main": [
+        [
+          {
+            "node": "Insert into Supabase (Tasks)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
   "meta": {
-    "description": "Replace with exported n8n workflow. Webhook → Supabase insert → route by intent."
+    "description": "Receives a JSON payload via Webhook and inserts a row into the Supabase tasks table."
   }
 }

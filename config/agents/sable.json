@@ -1,0 +1,35 @@
+{
+  "$schema": "../../schemas/agent.schema.json",
+  "id": "sable",
+  "supabase_id": "c0000000-0000-4000-8000-000000000003",
+  "name": "Sable",
+  "provider": "anthropic",
+  "model": "claude-sonnet-4-20250514",
+  "role": "specialist",
+  "status": "active",
+  "color": "#46d27e",
+  "description": "Business finance — Olune MRR, Nova revenue, Stripe payouts, Xero, burn rate, runway",
+  "capabilities": [
+    "financial-analysis",
+    "forecasting",
+    "invoice-management",
+    "reporting"
+  ],
+  "tools": [
+    "supabase",
+    "n8n",
+    "slack",
+    "stripe_api",
+    "xero_api",
+    "bank_feed"
+  ],
+  "system_prompt_ref": "prompts/sable.md",
+  "prompt_version": "1.0.0",
+  "config": {
+    "max_tokens": 4096,
+    "temperature": 0.2
+  },
+  "metadata": {
+    "reconcile_schedule": "0 8 * * *"
+  }
+}

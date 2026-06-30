@@ -1,0 +1,81 @@
+{
+  "name": "CYPHER Morning Brief",
+  "nodes": [
+    {
+      "name": "Schedule — 7am NZT",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "parameters": {
+        "rule": {
+          "cronExpression": "0 19 * * *"
+        }
+      },
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "name": "POST /api/cypher/chat",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.VERCEL_URL }}/api/cypher/chat",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "Cypher, give me the morning brief. Include: both companies, infrastructure status, anything in my inbox that needs attention, my health overnight, and the top 3 priorities for today."
+            },
+            {
+              "name": "session_id",
+              "value": "={{ 'morning-' + $now.toFormat('yyyy-MM-dd') }}"
+            }
+          ]
+        }
+      },
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.slack",
+      "parameters": {
+        "channel": "={{ $env.SLACK_BRIEF_CHANNEL }}",
+        "text": "=:brain: *CYPHER Morning Brief*\n\n{{ $json.reply }}"
+      },
+      "position": [
+        680,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule — 7am NZT": {
+      "main": [
+        [
+          {
+            "node": "POST /api/cypher/chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST /api/cypher/chat": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
