@@ -190,19 +190,19 @@ export function useVoiceAgent(): VoiceAgentState {
     rec.interimResults    = false;
     rec.maxAlternatives   = 1;
 
-    rec.onresult = (e) => {
+    rec.onresult = (e: any) => {
       const text = e.results[0]?.[0]?.transcript || '';
       console.log('[voice] STT result:', text);
       if (text) processTranscript(text);
     };
 
-    rec.onerror = (e) => {
+    rec.onerror = (e: any) => {
       console.error('[voice] STT error:', e.error);
       if (e.error !== 'no-speech') setError(`Speech error: ${e.error}`);
       setIsListening(false);
     };
 
-    rec.onend = () => {
+    rec.onend = (e: any) => {
       console.log('[voice] STT ended');
       setIsListening(false);
     };
