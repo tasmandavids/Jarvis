@@ -1,0 +1,123 @@
+version: '3.8'
+
+# CYPHER — Oracle Always Free box
+# Stack: n8n + Redis + nginx
+# Run: docker compose up -d
+
+services:
+
+  # ── Redis ─────────────────────────────────────────────────────────────────
+  # Used as: event bus, job queue, live state cache, n8n queue mode backend
+  redis:
+    image: redis:7-alpine
+    container_name: cypher-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass "${REDIS_PASSWORD}"
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 60 1
+      --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - cypher
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── n8n ───────────────────────────────────────────────────────────────────
+  # Self-hosted workflow automation — handles all connector integrations
+  # (Slack, Gmail, Stripe, GitHub, WhatsApp, etc.)
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: cypher-n8n
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      # Host / URL
+      N8N_HOST: "${N8N_HOST}"
+      N8N_PORT: "5678"
+      N8N_PROTOCOL: "https"
+      WEBHOOK_URL: "https://${N8N_HOST}"
+
+      # Auth
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: "${N8N_USER}"
+      N8N_BASIC_AUTH_PASSWORD: "${N8N_PASSWORD}"
+
+      # Database (use n8n's built-in SQLite for now; swap to Postgres when needed)
+      DB_TYPE: "sqlite"
+
+      # Queue mode — n8n uses Redis for scaling + retry
+      EXECUTIONS_MODE: "queue"
+      QUEUE_BULL_REDIS_HOST: "redis"
+      QUEUE_BULL_REDIS_PORT: "6379"
+      QUEUE_BULL_REDIS_PASSWORD: "${REDIS_PASSWORD}"
+
+      # Timezone
+      GENERIC_TIMEZONE: "Pacific/Auckland"
+      TZ: "Pacific/Auckland"
+
+      # Logging
+      N8N_LOG_LEVEL: "info"
+      N8N_LOG_OUTPUT: "console"
+
+      # Security
+      N8N_SECURE_COOKIE: "true"
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+
+      # Disable diagnostics phone-home
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+
+    volumes:
+      - n8n_data:/home/node/.n8n
+      # Mount workflow JSONs so they can be imported / version-controlled
+      - ../../n8n/workflows:/home/node/workflows:ro
+    networks:
+      - cypher
+    ports:
+      - "127.0.0.1:5678:5678"   # Only accessible via nginx — not exposed to internet
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ── nginx ─────────────────────────────────────────────────────────────────
+  # Reverse proxy: TLS termination, WebSocket upgrade, CORS for the cockpit
+  nginx:
+    image: nginx:alpine
+    container_name: cypher-nginx
+    restart: unless-stopped
+    depends_on:
+      - n8n
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro          # cert.pem + key.pem go here
+      - nginx_logs:/var/log/nginx
+    networks:
+      - cypher
+
+volumes:
+  redis_data:
+    name: cypher_redis_data
+  n8n_data:
+    name: cypher_n8n_data
+  nginx_logs:
+    name: cypher_nginx_logs
+
+networks:
+  cypher:
+    name: cypher_network
+    driver: bridge

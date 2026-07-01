@@ -1,9 +1,11 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-// Data lives at packages/config/data/ — resolve relative to this file so
-// Next.js standalone traces it correctly and Electron packaged builds work.
-const DATA_ROOT = join(__dirname, "..", "data");
+// Data lives at packages/config/data/. In a normal build we resolve relative
+// to this file, but Turbopack's standalone output rewrites __dirname to a
+// literal "/ROOT" placeholder, so the packaged Electron app must pass the real
+// absolute path via CYPHER_DATA_ROOT.
+const DATA_ROOT = process.env.CYPHER_DATA_ROOT || join(__dirname, "..", "data");
 
 export type AgentConfig = {
   id: string;

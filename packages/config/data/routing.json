@@ -1,38 +1,67 @@
 {
-  "version": "1.0.0",
-  "default_agent_id": "jarvis-groq-llama-70b",
+  "version": "2.0.0",
+  "default_agent_id": "cypher",
   "routes": [
     {
       "intent": "orchestrate",
-      "agent_id": "jarvis-groq-llama-70b",
-      "fallback_agent_id": "jarvis-groq-llama-8b",
-      "description": "Planning, delegation, multi-step reasoning"
+      "agent_id": "cypher",
+      "description": "Planning, delegation, multi-step reasoning, morning brief"
     },
     {
-      "intent": "execute",
-      "agent_id": "jarvis-groq-llama-8b",
-      "fallback_agent_id": "jarvis-groq-llama-70b",
-      "description": "Tool calls, structured output, API actions"
+      "intent": "infra",
+      "agent_id": "orion",
+      "fallback_agent_id": "cypher",
+      "description": "Servers, deploys, Vercel, GitHub, CI, uptime"
+    },
+    {
+      "intent": "finance",
+      "agent_id": "sable",
+      "fallback_agent_id": "cypher",
+      "description": "Revenue, invoices, Stripe, Xero, cashflow, runway"
+    },
+    {
+      "intent": "personal",
+      "agent_id": "vesper",
+      "fallback_agent_id": "cypher",
+      "description": "Health, sleep, calendar, reminders, nudges"
+    },
+    {
+      "intent": "ads",
+      "agent_id": "morrigan",
+      "fallback_agent_id": "cypher",
+      "description": "Campaigns, ROAS, growth, creative"
     },
     {
       "intent": "research",
-      "agent_id": "jarvis-gemini",
-      "fallback_agent_id": "jarvis-groq-llama-70b",
-      "description": "Long-context research and synthesis"
+      "agent_id": "theron",
+      "fallback_agent_id": "cypher",
+      "description": "News, markets, web research, briefings"
     },
     {
-      "intent": "review",
-      "agent_id": "jarvis-groq-llama-70b",
-      "description": "Code and output review"
+      "intent": "memory",
+      "agent_id": "hermes",
+      "fallback_agent_id": "cypher",
+      "description": "Recall, memory, Obsidian, what was said/written"
+    },
+    {
+      "intent": "comms",
+      "agent_id": "hermes",
+      "fallback_agent_id": "cypher",
+      "description": "Email, messages, Slack, WhatsApp, outbound replies"
     }
   ],
   "intent_detection": {
     "mode": "keyword",
     "default_intent": "orchestrate",
     "keywords": {
-      "research": ["research", "summarize", "analyze", "compare"],
-      "execute": ["run", "execute", "deploy", "create issue", "update"],
-      "orchestrate": ["plan", "coordinate", "delegate", "orchestrate"]
+      "infra": ["server", "deploy", "vercel", "github", "ci", "latency", "uptime", "orion"],
+      "finance": ["money", "invoice", "revenue", "mrr", "stripe", "xero", "cashflow", "runway", "sable"],
+      "personal": ["health", "sleep", "steps", "calendar", "reminder", "vesper"],
+      "ads": ["ads", "campaign", "roas", "facebook", "morrigan"],
+      "research": ["research", "news", "market", "summarize", "summarise", "theron"],
+      "memory": ["remember", "recall", "memory", "obsidian", "wrote", "said", "yesterday", "hermes"],
+      "comms": ["email", "message", "whatsapp", "slack", "send", "reply", "comms"],
+      "orchestrate": ["plan", "coordinate", "delegate", "orchestrate", "brief"]
     }
   }
 }

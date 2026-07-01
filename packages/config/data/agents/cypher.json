@@ -4,7 +4,7 @@
   "supabase_id": "c0000000-0000-4000-8000-000000000001",
   "name": "Cypher",
   "provider": "anthropic",
-  "model": "claude-sonnet-4-20250514",
+  "model": "claude-sonnet-4-6",
   "role": "orchestrator",
   "status": "active",
   "color": "#6aa8ff",

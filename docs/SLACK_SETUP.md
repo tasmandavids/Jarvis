@@ -75,7 +75,7 @@ SLACK_AGENT_RUNS_CHANNEL_ID=C...    # optional
 
 ```bash
 npm run dev
-curl http://localhost:3000/api/slack/status
+curl http://localhost:3005/api/slack/status
 ```
 
 ## n8n workflows

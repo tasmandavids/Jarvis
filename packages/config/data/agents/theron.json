@@ -4,7 +4,7 @@
   "supabase_id": "c0000000-0000-4000-8000-000000000006",
   "name": "Theron",
   "provider": "google",
-  "model": "gemini-2.5-pro",
+  "model": "gemini-2.5-flash",
   "role": "specialist",
   "status": "active",
   "color": "#ffc24d",

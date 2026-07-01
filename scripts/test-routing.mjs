@@ -8,7 +8,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const routing = JSON.parse(readFileSync(join(root, "config/routing.json"), "utf8"));
+const routing = JSON.parse(readFileSync(join(root, "packages/config/data/routing.json"), "utf8"));
 
 function detectIntentFromText(text) {
   const keywords = routing.intent_detection?.keywords;
@@ -32,10 +32,13 @@ function detectIntentFromText(text) {
 
 const cases = [
   ["research competitor pricing", "research"],
-  ["please deploy the staging app", "execute"],
+  ["please deploy the staging app", "infra"],
   ["plan the Q3 roadmap", "orchestrate"],
-  ["hello jarvis", null],
+  ["hello cypher", null],
   ["summarize this doc", "research"],
+  ["what's our stripe revenue this month", "finance"],
+  ["remind me to sleep earlier", "personal"],
+  ["reply to that slack message", "comms"],
 ];
 
 let failed = false;

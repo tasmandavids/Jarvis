@@ -4,7 +4,7 @@
   "supabase_id": "c0000000-0000-4000-8000-000000000002",
   "name": "Orion",
   "provider": "anthropic",
-  "model": "claude-haiku-4-20250514",
+  "model": "claude-haiku-4-5",
   "role": "specialist",
   "status": "active",
   "color": "#34d2c4",

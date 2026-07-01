@@ -10,7 +10,7 @@ npm install
 npm run vercel:link                         # link to Vercel project
 npm run env:pull                            # or env:push to upload local secrets
 npm run validate:config
-npm run dev                                 # http://localhost:3000
+npm run dev                                 # http://localhost:3005
 ```
 
 Secrets workflow: [docs/SECRETS.md](docs/SECRETS.md)

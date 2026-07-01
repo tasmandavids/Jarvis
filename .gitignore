@@ -32,6 +32,9 @@ supabase/.temp
 .vscode/*
 !.vscode/extensions.json
 
+# Claude Code local state
+.claude/
+
 # Logs
 *.log
 npm-debug.log*

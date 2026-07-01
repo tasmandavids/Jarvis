@@ -7,12 +7,13 @@
     "start": "electron .",
     "dev": "NODE_ENV=development electron .",
     "build": "electron-builder --mac",
-    "dist": "bash -lc 'cd ../.. && npm run build && cp apps/web/.env.local apps/web/.next/standalone/apps/web/.env.local && mkdir -p apps/web/.next/standalone/apps/web/.next && cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static && cp -r apps/web/public apps/web/.next/standalone/apps/web/public 2>/dev/null || true && cd apps/desktop && electron-builder --mac --publish never'"
+    "dist": "bash -lc 'cd ../.. && npm run build && cp apps/web/.env.local apps/web/.next/standalone/apps/web/.env.local && rm -rf apps/web/.next/standalone/apps/web/.next/static && cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static && rm -rf apps/web/.next/standalone/apps/web/public && cp -r apps/web/public apps/web/.next/standalone/apps/web/public 2>/dev/null || true && cd apps/desktop && electron-builder --mac --publish never'"
   },
   "build": {
     "appId": "com.tasmandavids.cypher",
     "productName": "CYPHER",
     "electronVersion": "42.5.1",
+    "afterPack": "./afterPack.js",
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
@@ -33,7 +34,12 @@
       {
         "from": "../web/.next/standalone",
         "to": "app",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*",
+          "**/.*",
+          "**/.next/**",
+          "**/node_modules/**"
+        ]
       }
     ]
   },

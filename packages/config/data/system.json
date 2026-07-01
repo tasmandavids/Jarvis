@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
-  "name": "Jarvis Command Centre",
-  "description": "AI agent orchestration hub",
-  "default_agent_id": "jarvis-groq-llama-70b",
+  "name": "CYPHER",
+  "description": "Personal Intelligence System — agent orchestration core",
+  "default_agent_id": "cypher",
   "timezone": "UTC",
   "data_paths": {
     "agents": "config/agents",

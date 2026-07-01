@@ -1,51 +1,33 @@
 /**
  * POST /api/cypher/chat
  *
- * Main CYPHER gateway: detects intent, retrieves memory via Hermes,
- * calls the appropriate agent LLM, logs to Supabase, and queues to Obsidian.
+ * Main CYPHER gateway: detects intent, routes to the right persona agent,
+ * retrieves memory via Hermes, calls that agent's LLM, logs to Supabase,
+ * and queues to Obsidian.
+ *
+ * Routing is config-driven: intent detection and agent selection come from
+ * @jarvis/config (packages/config/data/routing.json), and each agent's
+ * provider + model come from its JSON in packages/config/data/agents/.
+ * There is no second hardcoded model map — this is the single brain.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import Anthropic from '@anthropic-ai/sdk';
-import OpenAI from 'openai';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { loadAgents, resolveIntent, resolveAgentForIntent } from '@jarvis/config';
+import { routeChat, agentMaxTier, type Tier } from '@/lib/model-router';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
-const openai    = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
-const google    = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY!);
+// Display order shared with the cockpit's agent rail (cypher-interface.html).
+// hermes has no dedicated tile, so the cockpit folds it onto the orchestrator.
+const AGENT_ORDER = ['orion', 'sable', 'vesper', 'morrigan', 'theron', 'cypher', 'hermes'];
 
-// ── Intent detection (mirrors config/routing.json) ──────────────────────────
-function detectIntent(text: string): string {
-  const t = text.toLowerCase();
-  if (/server|deploy|vercel|github|ci|latency|uptime|orion/.test(t))           return 'infra';
-  if (/money|invoice|revenue|mrr|stripe|xero|cashflow|sable/.test(t))          return 'finance';
-  if (/health|sleep|steps|calendar|reminder|vesper/.test(t))                   return 'personal';
-  if (/ads|campaign|roas|facebook|morrigan/.test(t))                           return 'ads';
-  if (/research|news|market|summarize|theron/.test(t))                         return 'research';
-  if (/remember|recall|memory|obsidian|wrote|said|yesterday|hermes/.test(t))   return 'memory';
-  if (/email|message|whatsapp|slack|send|reply|comms|hermes/.test(t))          return 'comms';
-  return 'orchestrate';
-}
-
-const AGENT_MODELS: Record<string, { provider: string; model: string; id: string }> = {
-  orchestrate: { provider: 'anthropic', model: 'claude-sonnet-4-20250514', id: 'cypher'   },
-  infra:       { provider: 'anthropic', model: 'claude-haiku-4-20250514',  id: 'orion'    },
-  finance:     { provider: 'anthropic', model: 'claude-sonnet-4-20250514', id: 'sable'    },
-  personal:    { provider: 'anthropic', model: 'claude-sonnet-4-20250514', id: 'vesper'   },
-  ads:         { provider: 'openai',    model: 'gpt-4o',                   id: 'morrigan' },
-  research:    { provider: 'google',    model: 'gemini-2.5-pro',           id: 'theron'   },
-  memory:      { provider: 'anthropic', model: 'claude-sonnet-4-20250514', id: 'hermes'   },
-  comms:       { provider: 'anthropic', model: 'claude-sonnet-4-20250514', id: 'hermes'   },
-};
-
-// ── Load agent system prompt ─────────────────────────────────────────────────
+// Short persona system prompts. The richer prompts/*.md files aren't bundled
+// into the Next standalone server, so the agent identity lives here.
 const PROMPTS: Record<string, string> = {
-  cypher:   `You are Cypher, the CEO-level AI orchestrator for a personal intelligence system.`,
+  cypher:   `You are Cypher, the CEO-level AI orchestrator for a personal intelligence system. Be calm, precise, decisive. Brief, route, and act.`,
   orion:    `You are Orion, the infrastructure and DevOps agent. Be brief and metric-first.`,
   sable:    `You are Sable, the finance agent. Focus on cashflow, revenue, and financial clarity.`,
   vesper:   `You are Vesper, the personal assistant agent. Handle health, calendar, and personal tasks.`,
@@ -54,15 +36,31 @@ const PROMPTS: Record<string, string> = {
   hermes:   `You are Hermes, the memory and communications agent. Retrieve, synthesise, and send.`,
 };
 
+// Resolve provider + model + role for an agent from the config JSON.
+function agentRuntime(agentId: string): { provider: string; model: string; role?: string } | null {
+  const a = loadAgents().find((x) => x.id === agentId);
+  return a ? { provider: a.provider, model: a.model, role: (a as Record<string, unknown>).role as string | undefined } : null;
+}
+
+// Run a Supabase write but never let a logging failure 500 the user's reply.
+async function safeWrite(promise: PromiseLike<unknown>): Promise<void> {
+  try {
+    await promise;
+  } catch (err) {
+    console.error('[cypher] supabase write failed:', (err as Error)?.message);
+  }
+}
+
 // ── Retrieve memory context from Hermes ─────────────────────────────────────
 async function recallMemory(query: string, agentId: string): Promise<string | null> {
   try {
-    const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3005';
     const res = await fetch(`${base}/api/hermes/recall`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query, agent_id: agentId, top_k: 4 }),
     });
+    if (!res.ok) return null;
     const data = await res.json();
     return data.context || null;
   } catch {
@@ -80,7 +78,7 @@ async function rememberExchange(
   date: string
 ) {
   try {
-    const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3005';
     const content = `User asked [${intent}]: ${userText}\n${agentId.toUpperCase()} replied: ${agentReply}`;
     await fetch(`${base}/api/hermes/remember`, {
       method: 'POST',
@@ -99,100 +97,112 @@ async function rememberExchange(
   }
 }
 
-// ── Call the correct LLM ─────────────────────────────────────────────────────
+// ── Call LLM via the Tier 0→3 router ────────────────────────────────────────
 async function callLLM(
-  provider: string,
-  model: string,
+  _provider: string,
+  _model: string,
   agentId: string,
   systemPrompt: string,
   userText: string,
-  memoryContext: string | null
-): Promise<string> {
-  const system = memoryContext
-    ? `${systemPrompt}\n\n${memoryContext}`
-    : systemPrompt;
-
-  if (provider === 'anthropic') {
-    const msg = await anthropic.messages.create({
-      model,
-      max_tokens: 1024,
-      system,
-      messages: [{ role: 'user', content: userText }],
-    });
-    return msg.content[0].type === 'text' ? msg.content[0].text : '';
-  }
-
-  if (provider === 'openai') {
-    const msg = await openai.chat.completions.create({
-      model,
-      messages: [
-        { role: 'system', content: system },
-        { role: 'user',   content: userText },
-      ],
-    });
-    return msg.choices[0].message.content || '';
-  }
-
-  if (provider === 'google') {
-    const genModel = google.getGenerativeModel({ model });
-    const chat = genModel.startChat({ history: [] });
-    const result = await chat.sendMessage(`${system}\n\n${userText}`);
-    return result.response.text();
-  }
-
-  return `[${agentId.toUpperCase()}] Unknown provider: ${provider}`;
+  memoryContext: string | null,
+  maxTier: Tier = 3
+): Promise<{ text: string; tier: Tier; provider: string; model: string }> {
+  const system = memoryContext ? `${systemPrompt}\n\n${memoryContext}` : systemPrompt;
+  return routeChat(system, userText, { maxTier });
 }
 
 // ── Route handler ────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  const { text, session_id } = await req.json();
+  let text: string | undefined;
+  let session_id: string | undefined;
+  try {
+    ({ text, session_id } = await req.json());
+  } catch {
+    return NextResponse.json({ error: 'invalid JSON body' }, { status: 400 });
+  }
   if (!text) return NextResponse.json({ error: 'text required' }, { status: 400 });
 
-  const intent = detectIntent(text);
-  const agent  = AGENT_MODELS[intent] || AGENT_MODELS.orchestrate;
-  const sid    = session_id || crypto.randomUUID();
-  const today  = new Date().toLocaleDateString('en-CA', { timeZone: 'Pacific/Auckland' });
+  // Config-driven routing: intent → agent → provider/model (single source).
+  const intent = resolveIntent(text);
+  let agentId = resolveAgentForIntent(intent);
+  if (!PROMPTS[agentId]) agentId = 'cypher';
+  const rt = agentRuntime(agentId) || { provider: 'anthropic', model: 'claude-sonnet-4-6', role: undefined };
+  // Determine max tier from agent role (config json role field, or inferred from id)
+  const roleKey = rt.role || agentId;
+  const maxTier = agentMaxTier(roleKey);
 
-  // Log user turn
-  await supabase.from('agent_conversations').insert({
-    session_id: sid, agent_id: agent.id, speaker: 'user', intent, text,
-  });
+  const sid = session_id || crypto.randomUUID();
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Pacific/Auckland' });
+  const agentIdx = Math.max(0, AGENT_ORDER.indexOf(agentId));
+
+  // Log user turn (non-blocking on failure)
+  await safeWrite(
+    supabase.from('agent_conversations').insert({
+      session_id: sid, agent_id: agentId, speaker: 'user', intent, text,
+    })
+  );
 
   // Update live state → thinking
-  await supabase.from('cypher_live_state').update({
-    agent_idx: ['orion','sable','vesper','morrigan','theron','cypher','hermes'].indexOf(agent.id),
-    mode: 'thinking',
-    speaker: agent.id.toUpperCase(),
-    text: 'Working…',
-    updated_at: new Date().toISOString(),
-  }).eq('id', 1);
+  await safeWrite(
+    supabase.from('cypher_live_state').update({
+      agent_idx: agentIdx,
+      mode: 'thinking',
+      speaker: agentId.toUpperCase(),
+      text: 'Working…',
+      updated_at: new Date().toISOString(),
+    }).eq('id', 1)
+  );
 
   // Retrieve memory context (Hermes recall)
-  const memoryContext = await recallMemory(text, agent.id);
+  const memoryContext = await recallMemory(text, agentId);
 
-  // Call LLM
-  const systemPrompt = PROMPTS[agent.id] || PROMPTS.cypher;
-  const reply = await callLLM(agent.provider, agent.model, agent.id, systemPrompt, text, memoryContext);
+  // Call the LLM via router — a complete cascade failure becomes a clean 502.
+  let reply: string;
+  let usedModel: string = rt.model;
+  let usedProvider: string = rt.provider;
+  try {
+    const result = await callLLM(rt.provider, rt.model, agentId, PROMPTS[agentId], text, memoryContext, maxTier);
+    reply = result.text || '(the model returned no text)';
+    usedModel = result.model;
+    usedProvider = result.provider;
+  } catch (err) {
+    const message = (err as Error)?.message || 'LLM call failed';
+    console.error('[cypher] LLM error:', message);
+    await safeWrite(
+      supabase.from('cypher_live_state').update({
+        mode: 'error', speaker: agentId.toUpperCase(),
+        text: `LLM error: ${message}`, updated_at: new Date().toISOString(),
+      }).eq('id', 1)
+    );
+    return NextResponse.json(
+      { error: message, agent: agentId, intent, session_id: sid },
+      { status: 502 }
+    );
+  }
 
   // Log agent reply
-  await supabase.from('agent_conversations').insert({
-    session_id: sid, agent_id: agent.id, speaker: agent.id, intent, text: reply,
-  });
+  await safeWrite(
+    supabase.from('agent_conversations').insert({
+      session_id: sid, agent_id: agentId, speaker: agentId, intent, text: reply,
+    })
+  );
 
   // Write memory via Hermes (non-blocking)
-  rememberExchange(agent.id, sid, text, reply, intent, today);
+  rememberExchange(agentId, sid, text, reply, intent, today);
 
   // Update live state → responding
-  await supabase.from('cypher_live_state').update({
-    mode: 'responding',
-    text: reply,
-    updated_at: new Date().toISOString(),
-  }).eq('id', 1);
+  await safeWrite(
+    supabase.from('cypher_live_state').update({
+      mode: 'responding', text: reply, updated_at: new Date().toISOString(),
+    }).eq('id', 1)
+  );
 
   return NextResponse.json({
     reply,
-    agent: agent.id,
+    agent: agentId,
     intent,
+    model: usedModel,
+    provider: usedProvider,
     session_id: sid,
     memory_injected: !!memoryContext,
   });
