@@ -1,6 +1,7 @@
 {
   "$schema": "../../schemas/agent.schema.json",
   "id": "hermes",
+  "supabase_id": "c0000000-0000-4000-8000-000000000007",
   "name": "Hermes",
   "provider": "anthropic",
   "model": "claude-sonnet-4-6",

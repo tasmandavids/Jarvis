@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Validates config/*.json files against schemas/*.schema.json
+ * Validates packages/config/data/*.json against the required fields each
+ * loader in packages/config/src/index.ts expects.
  * Run: npm run validate:config
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -26,35 +27,26 @@ function collectJsonFiles(dir) {
   return files;
 }
 
-function validateRequired(obj, schema, path = "") {
+function validateRequired(file, data, requiredFields) {
   const errors = [];
-  for (const key of schema.required ?? []) {
-    if (!(key in obj)) {
-      errors.push(`${path}: missing required field "${key}"`);
+  for (const key of requiredFields) {
+    if (!(key in data)) {
+      errors.push(`${file}: missing required field "${key}"`);
     }
   }
   return errors;
 }
 
-function validateAgent(file, data) {
-  const schema = loadJson(join(root, "schemas/agent.schema.json"));
-  return validateRequired(data, schema, file);
-}
-
-function validateIntegration(file, data) {
-  const schema = loadJson(join(root, "schemas/integration.schema.json"));
-  return validateRequired(data, schema, file);
-}
-
-function validateWorkflow(file, data) {
-  const schema = loadJson(join(root, "schemas/workflow.schema.json"));
-  return validateRequired(data, schema, file);
-}
-
+// Required fields mirror the TS types in packages/config/src/index.ts —
+// AgentConfig, IntegrationConfig — plus the shape actually used by the
+// workflow registry files (there's no WorkflowConfig type, just id/name/status).
 const validators = {
-  "config/agents": validateAgent,
-  "config/integrations": validateIntegration,
-  "config/workflows": validateWorkflow,
+  "packages/config/data/agents": (file, data) =>
+    validateRequired(file, data, ["id", "supabase_id", "name", "provider", "model", "role", "status"]),
+  "packages/config/data/integrations": (file, data) =>
+    validateRequired(file, data, ["id", "name", "type", "status"]),
+  "packages/config/data/workflows": (file, data) =>
+    validateRequired(file, data, ["id", "name", "status"]),
 };
 
 let hasErrors = false;

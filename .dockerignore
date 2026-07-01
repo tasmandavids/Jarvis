@@ -5,3 +5,8 @@ node_modules
 **/.DS_Store
 **/*.log
 .DS_Store
+
+# Never bake secrets into the image — Fly deploy uses `fly secrets`
+.env
+.env.*
+!.env.example
