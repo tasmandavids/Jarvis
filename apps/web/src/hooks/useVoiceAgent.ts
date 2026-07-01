@@ -43,7 +43,7 @@ export function useVoiceAgent(): VoiceAgentState {
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const recognitionRef = useRef<unknown | null>(null);
+  const recognitionRef = useRef<any>(null);
   const audioCtxRef    = useRef<AudioContext | null>(null);
   const nextStartRef   = useRef<number>(0);       // next audio chunk start time in AudioContext
   const audioQueueRef  = useRef<Promise<void>>(Promise.resolve()); // serialise playback
