@@ -181,7 +181,7 @@ export function useVoiceAgent(): VoiceAgentState {
   const startListening = useCallback(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w = window as any;
-    const SR = (w.SpeechRecognition || w.webkitSpeechRecognition) as typeof SpeechRecognition | undefined;
+    const SR = (w.SpeechRecognition || w.webkitSpeechRecognition) as any;
     if (!SR) { setError('Speech recognition not available'); return; }
 
     const rec = new SR();
