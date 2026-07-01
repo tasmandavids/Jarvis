@@ -137,6 +137,10 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
+      // CYPHER speaks its replies proactively (Realtime-pushed updates have
+      // no direct user gesture to attach to) — this is a trusted first-party
+      // window, not an arbitrary page, so skip Chromium's autoplay gate.
+      autoplayPolicy: 'no-user-gesture-required',
     },
   });
 
