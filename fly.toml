@@ -5,7 +5,7 @@ primary_region = "syd"
 dockerfile = "Dockerfile"
 
 [http_service]
-internal_port = 3000
+internal_port = 3005
 force_https = true
 auto_stop_machines = false
 auto_start_machines = true
