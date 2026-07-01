@@ -121,10 +121,8 @@ Reading data = low-risk, comes first. **Any write action — send email, move mo
 ---
 
 ## Sources (verified June 2026)
-- Groq free tier: https://tokenmix.ai/blog/groq-free-tier-limits-2026 · https://console.groq.com/docs/rate-limits
 - Free LLM APIs: https://openrouter.ai/blog/tutorials/free-llm-apis-compared/ · https://awesomeagents.ai/tools/free-ai-inference-providers-2026/
 - Hermes 4: https://openrouter.ai/nousresearch/hermes-4-70b · https://openrouter.ai/nousresearch/hermes-4-405b
-- Oracle Always Free: https://medium.com/@imvinojanv/setup-always-free-vps-with-4-ocpu-24gb-ram-and-200gb-storage-the-ultimate-oracle-cloud-guide-bed5cbf73d34 · https://terminalbytes.com/oracle-cloud-free-tier-changes-2026/
 - DB free tiers: https://agentdeals.dev/database-free-tier-comparison-2026 · https://www.koyeb.com/blog/top-postgresql-database-free-tiers-in-2026
 - Local LLM on Mac / n8n: https://newtechreview.com.br/en/how-to-run-llama-70b-locally-2026-en/ · https://github.com/n8n-io/self-hosted-ai-starter-kit
 - STT benchmarks: https://northflank.com/blog/best-open-source-speech-to-text-stt-model-in-2026-benchmarks
