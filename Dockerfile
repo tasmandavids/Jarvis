@@ -25,8 +25,8 @@ COPY package.json package-lock.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/web/ ./
 
-EXPOSE 3000
-ENV PORT=3000
+EXPOSE 3005
+ENV PORT=3005
 ENV NODE_ENV=production
 
-CMD ["/bin/sh", "-lc", "cd apps/web && npm run start"]
+CMD ["npm", "run", "start"]
