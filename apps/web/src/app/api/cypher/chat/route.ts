@@ -11,14 +11,23 @@
  * There is no second hardcoded model map — this is the single brain.
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { loadAgents, resolveIntent, resolveAgentForIntent } from '@jarvis/config';
 import { routeChat, agentMaxTier, type Tier } from '@/lib/model-router';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy singleton — a module-scope createClient() call runs during Next's
+// build-time page-data collection, which has no env vars set and throws
+// synchronously on a missing supabaseUrl.
+let _supabase: SupabaseClient | null = null;
+function getSupabase(): SupabaseClient {
+  if (!_supabase) {
+    _supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return _supabase;
+}
 
 // Display order shared with the cockpit's agent rail (cypher-interface.html).
 // hermes has no dedicated tile, so the cockpit folds it onto the orchestrator.
@@ -113,6 +122,7 @@ async function callLLM(
 
 // ── Route handler ────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
+  const supabase = getSupabase();
   let text: string | undefined;
   let session_id: string | undefined;
   try {

@@ -8,17 +8,30 @@
  * Trigger via n8n cron at 23:00 NZT, or call directly.
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import Anthropic from '@anthropic-ai/sdk';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy singletons — module-scope construction runs during Next's build-time
+// page-data collection, which has no env vars set.
+let _supabase: SupabaseClient | null = null;
+function getSupabase(): SupabaseClient {
+  if (!_supabase) {
+    _supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return _supabase;
+}
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+let _anthropic: Anthropic | null = null;
+function getAnthropic(): Anthropic {
+  if (!_anthropic) _anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+  return _anthropic;
+}
 
 export async function POST(req: NextRequest) {
+  const supabase = getSupabase();
   // Allow specifying a date; default to today NZT
   const { date, secret } = await req.json().catch(() => ({}));
 
@@ -70,7 +83,7 @@ Brief note on which agents were active and what they handled.
 TRANSCRIPT:
 ${transcript}`;
 
-  const response = await anthropic.messages.create({
+  const response = await getAnthropic().messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 2048,
     messages: [{ role: 'user', content: consolidationPrompt }],

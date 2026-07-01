@@ -5,18 +5,30 @@
  * Called by the chat gateway before each LLM call to inject context.
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy singletons — module-scope construction runs during Next's build-time
+// page-data collection, which has no env vars set.
+let _supabase: SupabaseClient | null = null;
+function getSupabase(): SupabaseClient {
+  if (!_supabase) {
+    _supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return _supabase;
+}
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!_openai) _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+  return _openai;
+}
 
 async function embed(text: string): Promise<number[]> {
-  const res = await openai.embeddings.create({
+  const res = await getOpenAI().embeddings.create({
     model: 'text-embedding-3-small',
     input: text,
   });
@@ -24,6 +36,7 @@ async function embed(text: string): Promise<number[]> {
 }
 
 export async function POST(req: NextRequest) {
+  const supabase = getSupabase();
   const { query, agent_id, top_k = 5, threshold = 0.75 } = await req.json();
 
   if (!query) {

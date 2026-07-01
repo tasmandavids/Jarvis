@@ -6,7 +6,14 @@ node_modules
 **/*.log
 .DS_Store
 
-# Never bake secrets into the image — Fly deploy uses `fly secrets`
-.env
-.env.*
-!.env.example
+# Never bake secrets into the image — Fly deploy uses `fly secrets`.
+# Must be **-prefixed: bare ".env.*" only matches the context root, not
+# nested paths like apps/web/.env.local (confirmed empirically).
+**/.env
+**/.env.*
+!**/.env.example
+
+# Electron desktop build artifacts — not needed for the web image, and
+# apps/desktop/dist alone is ~900MB of .dmg/.app bundles.
+apps/desktop/dist
+apps/desktop/node_modules
